@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compresión Geopolítica de la Realidad — Pozo Azul</title>
+    <!-- Google Fonts Share Tech Mono -->
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* =========================================
+           PALETA BASE (NEGRO LAVADO TÁCTICO)
+           ========================================= */
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #161618;
+            color: #e0e0e0;
+            font-family: 'Share Tech Mono', monospace, sans-serif;
+        }
+
+        #xxiii-geopol-map {
+            background-color: #161618; /* Negro lavado puro */
+            color: #e0e0e0;
+            touch-action: manipulation;
+        }
+
+        #xxiii-geopol-map .content-wrapper { 
+            position: relative; z-index: 10; height: 100%; display: flex; flex-direction: column; 
+            transition: opacity 1.5s ease; /* Transición para la secuencia Omega */
+        }
+
+        /* CAPA BASE DEL MAPA (Oculta por defecto, revelación fluida) */
+        #xxiii-geopol-map .map-bg {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: url('https://upload.wikimedia.org/wikipedia/commons/8/80/World_map_-_low_resolution.svg');
+            background-size: cover; background-position: center;
+            z-index: 0; pointer-events: none; 
+            opacity: 0; /* Oculto inicialmente */
+            filter: invert(1);
+            transition: opacity 2s ease;
+        }
+
+        #xxiii-geopol-map .tactical-grid-bg {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: url('https://upload.wikimedia.org/wikipedia/commons/8/80/World_map_-_low_resolution.svg');
+            background-size: contain; background-position: center; background-repeat: no-repeat;
+            filter: invert(1); 
+            opacity: 0; /* Oculto inicialmente */
+            z-index: 1; pointer-events: none;
+            transition: opacity 2s ease;
+        }
+
+        /* Clases activas para proyectar la geografía */
+        #xxiii-geopol-map.map-visible .map-bg { opacity: 0.05; }
+        #xxiii-geopol-map.map-visible .tactical-grid-bg { opacity: 0.15; }
+
+        /* CONTENEDOR DE NODOS */
+        #xxiii-geopol-map .tactical-nodes {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 10;
+        }
+
+        /* Botones de Filtro y Control */
+        .filter-btn {
+            background: rgba(20, 20, 20, 0.8); border: 1px solid #333; color: #888;
+            transition: all 0.2s ease; padding: 8px 12px; 
+        }
+        .filter-btn:hover { background: rgba(50, 50, 50, 0.9); color: #fff; }
+        .filter-btn.active { border-color: #00a2ff; background: rgba(0, 76, 125, 0.2); color: #00a2ff; box-shadow: 0 0 10px rgba(0, 162, 255, 0.2); }
+        
+        /* Botones de Sistema Específicos */
+        .btn-system-toggle { border-color: #00ffcc; color: #00ffcc; }
+        .btn-system-toggle:hover { background: rgba(0, 255, 204, 0.1); color: #fff; }
+        .btn-system-toggle.active { background: rgba(0, 255, 204, 0.2); border-color: #00ffcc; color: #00ffcc; box-shadow: 0 0 15px rgba(0,255,204,0.3); }
+        
+        .btn-system-kill { border-color: #ff3333; color: #ff3333; }
+        .btn-system-kill:hover { background: rgba(255, 51, 51, 0.2); color: #fff; box-shadow: 0 0 15px rgba(255,51,51,0.5); }
+
+        /* Nodos de Tensión */
+        #xxiii-geopol-map .node {
+            position: absolute; width: 22px; height: 22px; background-color: #ff3333;
+            border-radius: 50%; cursor: pointer; transform: translate(-50%, -50%);
+            box-shadow: 0 0 10px #ff3333; transition: opacity 0.5s ease, transform 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
+            z-index: 20; display: flex; align-items: center; justify-content: center;
+            color: #fff; font-size: 11px; font-weight: bold; text-shadow: 0px 0px 3px rgba(0,0,0,0.8); user-select: none;
+        }
+
+        #xxiii-geopol-map .node::before {
+            content: ''; position: absolute; top: 50%; left: 50%; width: 44px; height: 44px;
+            transform: translate(-50%, -50%); border-radius: 50%; z-index: 25; background: transparent;
+        }
+
+        #xxiii-geopol-map .node::after {
+            content: ''; position: absolute; top: 50%; left: 50%; width: 100%; height: 100%;
+            transform: translate(-50%, -50%); border: 1px solid #ff3333; border-radius: 50%;
+            animation: xxiii-ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+        }
+
+        #xxiii-geopol-map .node:hover, #xxiii-geopol-map .node.is-active {
+            transform: translate(-50%, -50%) scale(1.4); background-color: #fff !important;
+            color: #000 !important; text-shadow: none; box-shadow: 0 0 25px #fff !important; z-index: 50 !important;
+        }
+        #xxiii-geopol-map .node:hover::before, #xxiii-geopol-map .node.is-active::before { z-index: 55; }
+        #xxiii-geopol-map .node:hover::after, #xxiii-geopol-map .node.is-active::after { display: none; }
+
+        /* Clases Específicas por Bando/Tipo */
+        #xxiii-geopol-map .node.brics { background-color: #ffaa00; box-shadow: 0 0 10px #ffaa00; }
+        #xxiii-geopol-map .node.brics::after { border-color: #ffaa00; }
+        #xxiii-geopol-map .node.g7 { background-color: #0088ff; box-shadow: 0 0 10px #0088ff; }
+        #xxiii-geopol-map .node.g7::after { border-color: #0088ff; }
+        #xxiii-geopol-map .node.space { background-color: #b000ff; box-shadow: 0 0 10px #b000ff; }
+        #xxiii-geopol-map .node.space::after { border-color: #b000ff; }
+        #xxiii-geopol-map .node.history { background-color: #00ffcc; box-shadow: 0 0 10px #00ffcc; }
+        #xxiii-geopol-map .node.history::after { border-color: #00ffcc; animation: xxiii-ping-slow 4s cubic-bezier(0, 0, 0.2, 1) infinite; }
+        #xxiii-geopol-map .node.dimmed { opacity: 0.15 !important; pointer-events: none; z-index: 5 !important; }
+        #xxiii-geopol-map .node.dimmed::after, #xxiii-geopol-map .node.dimmed::before { display: none; }
+
+        @keyframes xxiii-ping { 75%, 100% { width: 300%; height: 300%; opacity: 0; } }
+        @keyframes xxiii-ping-slow { 75%, 100% { width: 250%; height: 250%; opacity: 0; } }
+
+        /* Panel de Información */
+        #xxiii-geopol-map .info-panel {
+            background: rgba(15, 15, 18, 0.9);
+            backdrop-filter: blur(5px); border: 1px solid #333;
+            border-left-width: 4px; transition: all 0.3s ease; opacity: 0;
+            transform: translateY(10px); pointer-events: none; display: flex; flex-direction: column;
+        }
+        #xxiii-geopol-map .info-panel.active { opacity: 1; transform: translateY(0); pointer-events: auto; }
+
+        .glitch-anim { animation: textGlitch 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) both; }
+        @keyframes textGlitch {
+            0% { opacity: 0; transform: translateX(-5px); }
+            20% { opacity: 1; transform: translateX(5px); color: #fff; }
+            40% { opacity: 0.5; transform: translateX(-2px); }
+            60% { opacity: 1; transform: translateX(2px); }
+            100% { opacity: 1; transform: translateX(0); }
+        }
+
+        /* Efecto Cursor Typewriter */
+        .typing-cursor::after {
+            content: '█';
+            animation: blink 1s step-start infinite;
+            margin-left: 4px;
+            color: #00a2ff;
+        }
+        @keyframes blink { 50% { opacity: 0; } }
+
+        #xxiii-geopol-map .crt-overlay {
+            position: absolute; inset: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+            background-size: 100% 4px, 6px 100%; z-index: 999; pointer-events: none; opacity: 0.2;
+        }
+
+        /* Pantalla Omega (Reflexión Final) */
+        #omega-screen {
+            position: absolute; inset: 0; z-index: 9999;
+            background: #0a0a0c; color: #fff;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none; transition: opacity 2s ease;
+        }
+        #omega-screen.active {
+            opacity: 1; pointer-events: auto;
+        }
+
+        .nav-btn { color: #666; transition: all 0.2s; }
+        .nav-btn:hover:not(:disabled) { color: #fff; text-shadow: 0 0 5px #fff; }
+        .nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+        /* Estilos de Imagen */
+        .img-container {
+            position: relative; width: 100%; height: 160px; overflow: hidden; border-radius: 4px;
+            background-color: #111; margin-bottom: 1rem; border: 1px solid #333;
+        }
+        
+        .img-content {
+            width: 100%; height: 100%; object-fit: cover;
+            filter: grayscale(80%) sepia(20%);
+            transition: all 0.5s ease;
+        }
+        .img-container:hover .img-content {
+            filter: grayscale(0%) sepia(0%);
+            transform: scale(1.05);
+        }
+
+        /* Disclaimer de Autoría */
+        .map-disclaimer {
+            color: #555;
+            font-size: 10px;
+            line-height: 1.5;
+            margin-top: 15px;
+            border-top: 1px solid #222;
+            padding-top: 10px;
+        }
+        .map-disclaimer a {
+            color: #00a2ff;
+            text-decoration: none;
+        }
+        .map-disclaimer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body class="bg-[#161618]">
+
+    <div id="xxiii-geopol-map" class="relative w-full min-h-screen overflow-hidden flex flex-col font-mono">
+        <div class="crt-overlay"></div>
+        <div class="map-bg"></div>
+
+        <!-- PANTALLA DE REFLEXIÓN FINAL (Oculta) -->
+        <div id="omega-screen">
+            <div class="max-w-3xl text-center p-8 px-4 md:px-12">
+                <h1 class="text-2xl md:text-3xl font-bold tracking-widest text-[#00a2ff] mb-8 glitch-anim opacity-0 transition-opacity duration-1000" id="omega-title">SISTEMA APAGADO</h1>
+                <p id="omega-text" class="text-gray-300 leading-loose md:leading-loose font-mono text-sm md:text-lg min-h-[150px]"></p>
+                <div class="mt-12 text-xs md:text-sm text-gray-600 tracking-widest opacity-0 transition-opacity duration-1000" id="omega-footer">
+                    [ FIN DE LA TRANSMISIÓN ]
+                </div>
+            </div>
+        </div>
+
+        <div class="content-wrapper p-4 md:p-8">
+            
+            <!-- HEADER -->
+            <header class="w-full border-b border-gray-800 pb-4 mb-6 flex flex-col lg:flex-row justify-between items-start lg:items-end gap-4">
+                <div>
+                    <h1 class="text-2xl md:text-4xl font-bold tracking-widest text-white uppercase">Compresión Geopolítica de la Realidad</h1>
+                    <p class="text-sm md:text-base text-gray-400 mt-2 max-w-2xl">
+                        Mapeo topológico de las tensiones hegemónicas, cadenas de suministro y el dominio del espacio exterior. La ideología cede ante la materia.
+                    </p>
+                </div>
+                
+                <!-- BOTONES DE SISTEMA (Proyectar / Apagar) -->
+                <div class="flex gap-2 text-[10px] md:text-xs">
+                    <button onclick="xxiiiToggleMap()" id="btn-toggle-map" class="filter-btn btn-system-toggle rounded tracking-widest uppercase font-bold">
+                        Proyectar Topología
+                    </button>
+                    <button onclick="xxiiiTriggerOmega()" class="filter-btn btn-system-kill rounded tracking-widest uppercase font-bold">
+                        Apagar Sistema
+                    </button>
+                </div>
+            </header>
+
+            <!-- CONTENEDOR MODULAR -->
+            <div class="flex-1 flex flex-col lg:flex-row gap-6 lg:gap-8 relative">
+                
+                <!-- COLUMNA IZQUIERDA: Filtros y Mapa -->
+                <div class="w-full lg:w-2/3 flex flex-col relative">
+                    
+                    <!-- Filtros (Análisis) -->
+                    <div class="w-full flex flex-wrap justify-center lg:justify-start gap-2 text-[10px] md:text-xs mb-6 z-30">
+                        <button onclick="xxiiiFilterNodes('all', this)" class="filter-btn active rounded tracking-widest uppercase">Todo</button>
+                        <button onclick="xxiiiFilterNodes('power', this)" class="filter-btn rounded tracking-widest uppercase">Hegemonía</button>
+                        <button onclick="xxiiiFilterNodes('friction', this)" class="filter-btn rounded tracking-widest uppercase">Fricción</button>
+                        <button onclick="xxiiiFilterNodes('history', this)" class="filter-btn rounded tracking-widest uppercase">Historia</button>
+                    </div>
+
+                    <!-- Estructura del Mapa -->
+                    <div class="relative w-full max-w-[1200px] mx-auto aspect-[2/1]">
+                        <!-- El fondo del mapa visual -->
+                        <div class="tactical-grid-bg"></div>
+                        
+                        <!-- Contenedor transparente interactivo para los nodos -->
+                        <div class="tactical-nodes" id="tactical-map">
+                            <!-- CICATRICES HISTÓRICAS -->
+                            <div class="node history" data-layer="history" data-id="ww1" style="top: 28%; left: 47%;" onclick="xxiiiShowData('ww1')" title="Primera Guerra Mundial"></div>
+                            <div class="node history" data-layer="history" data-id="ww2" style="top: 26%; left: 28%;" onclick="xxiiiShowData('ww2')" title="Segunda Guerra Mundial"></div>
+                            <div class="node history" data-layer="history" data-id="cold_war" style="top: 18%; left: 54%;" onclick="xxiiiShowData('cold_war')" title="Guerra Fría"></div>
+                            <!-- NODOS DE PODER ACTUALES -->
+                            <div class="node g7" data-layer="power" data-id="g7" style="top: 32%; left: 22%;" onclick="xxiiiShowData('g7')" title="G7 (Washington)"></div>
+                            <div class="node brics" data-layer="power" data-id="brics" style="top: 32%; left: 76%;" onclick="xxiiiShowData('brics')" title="BRICS (Beijing)"></div>
+                            <!-- TENSIONES TERRESTRES -->
+                            <div class="node" data-layer="friction" data-id="ukraine" style="top: 26%; left: 58%;" onclick="xxiiiShowData('ukraine')" title="Teatro Ucrania"></div>
+                            <div class="node" data-layer="friction" data-id="middle_east" style="top: 41%; left: 63%;" onclick="xxiiiShowData('middle_east')" title="Punto de Asfixia (M.O.)"></div>
+                            <div class="node" data-layer="friction" data-id="taiwan" style="top: 40%; left: 84%;" onclick="xxiiiShowData('taiwan')" title="Estrecho de Taiwán"></div>
+                            <div class="node" data-layer="friction" data-id="venezuela" style="top: 55%; left: 28%;" onclick="xxiiiShowData('venezuela')" title="Intervención VZLA"></div>
+                            <!-- CARRERA ESPACIAL -->
+                            <div class="node space" data-layer="power" data-id="artemis" style="top: 15%; left: 16%;" onclick="xxiiiShowData('artemis')" title="Proyecto Artemis"></div>
+                            <div class="node space" data-layer="power" data-id="ilrs" style="top: 22%; left: 81%;" onclick="xxiiiShowData('ilrs')" title="ILRS Lunar"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- COLUMNA DERECHA: Panel de Información -->
+                <div class="w-full lg:w-1/3 flex items-start justify-center relative pb-10 lg:pb-0" id="data-container-anchor">
+                    
+                    <!-- Panel de Inicio (Default) -->
+                    <div id="default-panel" class="absolute inset-x-0 top-0 flex flex-col items-center justify-center text-gray-500 border border-dashed border-gray-700 rounded p-6 text-center text-xs md:text-sm uppercase tracking-widest min-h-[250px]">
+                        <div class="animate-pulse mb-3 text-[#00a2ff] text-2xl">[+]</div>
+                        <p class="mb-4">ANALIZA UN NODO O INICIA EL BRIEFING</p>
+                        <button onclick="xxiiiStartBriefing()" class="px-6 py-2 border border-[#00a2ff] text-[#00a2ff] hover:bg-[#00a2ff] hover:text-black transition-colors rounded tracking-widest font-bold">
+                            INICIAR SECUENCIA
+                        </button>
+                    </div>
+
+                    <!-- Panel de Datos Activo -->
+                    <div id="data-panel" class="info-panel p-5 md:p-6 rounded w-full relative z-10 hidden flex-1 h-full shadow-2xl">
+                        <div class="flex justify-between items-start mb-4">
+                            <h2 id="panel-title" class="text-lg md:text-xl font-bold uppercase text-white tracking-wider data-glitch">TITULO</h2>
+                            <span id="panel-tag" class="text-[9px] md:text-xs px-2 py-1 bg-gray-800 text-gray-300 rounded border border-gray-700 uppercase data-glitch whitespace-nowrap ml-2">TAG</span>
+                        </div>
+                        
+                        <!-- IMAGEN -->
+                        <div class="img-container data-glitch">
+                            <img id="panel-img-evidencia" src="" alt="Evidencia Geopolítica" class="img-content">
+                            <div class="absolute bottom-2 left-2 text-[8px] bg-black/60 text-white px-1 font-mono tracking-widest">SAT_FEED_REC</div>
+                        </div>
+
+                        <div id="panel-stats" class="grid grid-cols-2 gap-3 mb-4 text-sm border-y border-gray-800 py-3 data-glitch">
+                            <!-- Generado vía JS -->
+                        </div>
+
+                        <!-- DESCRIPCIÓN CON EFECTO TYPEWRITER -->
+                        <div class="text-xs md:text-sm text-gray-300 leading-relaxed flex-1">
+                            <p id="panel-desc1" class="typing-cursor min-h-[80px]"></p>
+                        </div>
+
+                        <div class="flex justify-between items-center mt-6 pt-4 border-t border-gray-800 w-full">
+                            <button id="btn-prev" onclick="xxiiiNavStep(-1)" class="nav-btn text-[10px] md:text-xs uppercase tracking-widest font-bold">&lt; Anterior</button>
+                            <span id="step-indicator" class="text-[10px] md:text-xs text-[#00a2ff] font-bold tracking-widest">1 / 11</span>
+                            <button id="btn-next" onclick="xxiiiNavStep(1)" class="nav-btn text-[10px] md:text-xs uppercase tracking-widest font-bold">Siguiente &gt;</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- LEYENDA Y DISCLAIMER -->
+            <div class="mt-6 border-t border-gray-800 pt-4 flex flex-col gap-4 text-xs tracking-widest z-30 relative">
+                <div class="flex flex-wrap justify-center lg:justify-start gap-3 md:gap-4 text-[9px] md:text-xs text-gray-500 uppercase">
+                    <div class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-[#0088ff]"></span> Hegemonía G7</div>
+                    <div class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-[#ffaa00]"></span> Expansión BRICS</div>
+                    <div class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-[#ff3333]"></span> Fricción Activa</div>
+                    <div class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-[#b000ff]"></span> Dominio Orbital</div>
+                    <div class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-[#00ffcc]"></span> Cicatriz Histórica</div>
+                </div>
+                
+                <div class="map-disclaimer">
+                    * Esta aplicación es de código abierto. Creada mediante Vibe Coding (programación asistida por IA) con ayuda de Gemini y Antigravity. Se otorga permiso total de modificación, mejora y reedición. Si desarrollas tu propia versión, contáctanos en <a href="mailto:hola@xxiiimagazine.com">hola@xxiiimagazine.com</a>. La mayoría de este código fue generado por Vibe Coding.
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            const xxiiiGeopolData = {
+                g7: {
+                    title: "Hegemonía Financiera G7",
+                    tag: "Poder Hegemónico",
+                    img: "https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?q=80&w=600&auto=format&fit=crop",
+                    stats: { "PIB Global": "43%", "Deuda/PIB": "122%", "Control SWIFT": "Extremo", "Estatus": "Declive Relativo" },
+                    desc: "El bloque occidental consolida su defensa a través de la militarización del dólar y sanciones económicas. Su capacidad de proyección de poder depende del mantenimiento del control de las transacciones globales y el sistema SWIFT."
+                },
+                brics: {
+                    title: "Bloque de Expansión BRICS",
+                    tag: "Multipolaridad",
+                    img: "https://images.unsplash.com/photo-1509062522246-3755977927d7?q=80&w=600&auto=format&fit=crop",
+                    stats: { "Población": "46%", "PIB PPA": "35%", "Reservas Oro": "+12K Ton", "Estatus": "Ascendente" },
+                    desc: "La alianza euroasiática y global sur acelera la desdolarización bilateral. Rusia y China lideran una infraestructura financiera alternativa y aseguran el control de cadenas de suministro clave en África y América Latina."
+                },
+                ukraine: {
+                    title: "Fricción Terrestre Ucrania",
+                    tag: "Guerra Proxy",
+                    img: "https://images.unsplash.com/photo-1461360370896-922624d12aa1?q=80&w=600&auto=format&fit=crop",
+                    stats: { "Tipo": "Fricción Activa", "Bajas Est": "+450K", "Apoyo Occidental": "+$200B", "Estatus": "Desgaste" },
+                    desc: "El frente ucraniano representa la guerra de desgaste de mayor intensidad del siglo XXI. Se ensayan tácticas de drones autónomos integrados con inteligencia satelital comercial (Starlink) en un entorno de guerra electrónica total."
+                },
+                middle_east: {
+                    title: "Asfixia del Mar Rojo / M.O.",
+                    tag: "Logística",
+                    img: "https://images.unsplash.com/photo-1544256718-3bcf237f3974?q=80&w=600&auto=format&fit=crop",
+                    stats: { "Tránsito Suez": "-60%", "Flujo Crudo": "12M BPD", "Fricción Houthi": "Crítica", "Estatus": "Alerta" },
+                    desc: "La inestabilidad en el golfo de Adén y el estrecho de Bab el-Mandeb interrumpe el flujo comercial entre Asia y Europa. Los costos de flete marítimo se duplican al obligar la ruta circunnavegatoria africana."
+                },
+                taiwan: {
+                    title: "Cuello de Botella Semiconductores",
+                    tag: "Disputa Global",
+                    img: "https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=600&auto=format&fit=crop",
+                    stats: { "Semiconductores": "90% Avanzados", "Tránsito Anual": "$3.4T", "Fuerza Naval": "Alta Densidad", "Estatus": "Crítico" },
+                    desc: "El centro neural del silicio avanzado global. Un bloqueo en el estrecho detendría el 60% de la capacidad de procesamiento tecnológico del planeta, forzando una carrera feroz de relocalización o 'reshoring' en EE.UU. y la UE."
+                },
+                venezuela: {
+                    title: "Reserva Energética Orinoco",
+                    tag: "Recursos Críticos",
+                    img: "https://images.unsplash.com/photo-1535732820275-9ffd998cac22?q=80&w=600&auto=format&fit=crop",
+                    stats: { "Reservas Crudo": "303B Bls", "Sanciones": "Activas", "Inversión BRICS": "Creciente", "Estatus": "Latente" },
+                    desc: "La mayor concentración de crudo pesado del planeta. El control sobre la faja del Orinoco mantiene la tensión geopolítica americana, sirviendo como base logística y de recursos en el hemisferio occidental para la coalición BRICS."
+                },
+                artemis: {
+                    title: "Iniciativa Lunar Artemis",
+                    tag: "Carrera Orbital",
+                    img: "https://images.unsplash.com/photo-1454789548928-9efd52dc4031?q=80&w=600&auto=format&fit=crop",
+                    stats: { "Liderazgo": "NASA / G7", "Acuerdos": "+40 Naciones", "Meta LOPG": "2028", "Estatus": "Activo" },
+                    desc: "La coalición occidental para el establecimiento permanente en el polo sur lunar. Artemis busca regular la minería del hielo de agua lunar antes de que la coalición rival establezca reclamos territoriales de facto."
+                },
+                ilrs: {
+                    title: "Estación Lunar ILRS",
+                    tag: "Carrera Orbital",
+                    img: "https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?q=80&w=600&auto=format&fit=crop",
+                    stats: { "Liderazgo": "CNSA / Rusia", "Socios": "BRICS / LatAm", "Base Lunar": "2030", "Estatus": "Planificación" },
+                    desc: "El proyecto lunar conjunto liderado por China y Rusia. Diseñado en competencia directa con Artemis, busca asegurar zonas estratégicas de alunizaje y establecer un marco regulatorio lunar fuera de la hegemonía estadounidense."
+                },
+                ww1: {
+                    title: "Colapso Imperial (1914-1918)",
+                    tag: "Cicatriz Histórica",
+                    img: "https://images.unsplash.com/photo-1501869123898-4116b7440897?q=80&w=600&auto=format&fit=crop",
+                    stats: { "Caídos": "20 M", "Imperios Disueltos": "4", "Modo Guerra": "Trincheras", "Resultado": "Versalles" },
+                    desc: "El colapso de la vieja Europa marcó el inicio del dominio de la producción industrial masiva sobre la guerra. Las fronteras actuales del Medio Oriente y las tensiones del este europeo tienen su raíz en este conflicto."
+                },
+                ww2: {
+                    title: "Hegemonía Bipolar (1939-1945)",
+                    tag: "Cicatriz Histórica",
+                    img: "https://images.unsplash.com/photo-1540910419892-4a36d2c3266c?q=80&w=600&auto=format&fit=crop",
+                    stats: { "Caídos": "70 M", "Potencias Nucleares": "1", "Destrucción": "Extrema", "Resultado": "Bretton Woods" },
+                    desc: "La conflagración total que consolidó a Estados Unidos y la Unión Soviética como superpotencias mundiales. Estableció el orden financiero de Bretton Woods que rige hasta el día de hoy."
+                },
+                cold_war: {
+                    title: "Equilibrio del Terror (1947-1991)",
+                    tag: "Cicatriz Histórica",
+                    img: "https://images.unsplash.com/photo-1508739773434-c26b3d09e071?q=80&w=600&auto=format&fit=crop",
+                    stats: { "Guerra Proxy": "Múltiples", "Arsenal Nuclear": "~70K Ojivas", "Carrera": "Sputnik/Apolo", "Resultado": "Colapso URSS" },
+                    desc: "Cuarenta años de tensión ideológica respaldados por la amenaza de destrucción mutua asegurada (MAD). La caída del muro de Berlín dio inicio al período de hiperglobalización y dominio unipolar estadounidense."
+                }
+            };
+
+            const xxiiiBriefingSequence = ["ww1", "ww2", "cold_war", "g7", "brics", "ukraine", "middle_east", "taiwan", "venezuela", "artemis", "ilrs"];
+            let xxiiiCurrentStep = 0;
+            let xxiiiTypingTimer = null;
+
+            window.xxiiiShowData = function(id) {
+                const node = xxiiiGeopolData[id];
+                if (!node) return;
+                
+                xxiiiCurrentStep = xxiiiBriefingSequence.indexOf(id);
+                
+                document.getElementById('default-panel').classList.add('hidden');
+                const dataPanel = document.getElementById('data-panel');
+                dataPanel.classList.remove('hidden');
+                dataPanel.classList.add('active');
+                
+                document.querySelectorAll('.node').forEach(n => n.classList.remove('is-active'));
+                const activeNode = document.querySelector(`.node[data-id="${id}"]`);
+                if (activeNode) activeNode.classList.add('is-active');
+                
+                document.getElementById('panel-title').innerText = node.title;
+                document.getElementById('panel-tag').innerText = node.tag;
+                document.getElementById('panel-img-evidencia').src = node.img;
+                
+                const statsContainer = document.getElementById('panel-stats');
+                statsContainer.innerHTML = '';
+                for (const [key, val] of Object.entries(node.stats)) {
+                    statsContainer.innerHTML += `<div><span class="text-gray-500 font-bold uppercase block text-[10px]">${key}</span><span class="text-white font-bold">${val}</span></div>`;
+                }
+                
+                const descElement = document.getElementById('panel-desc1');
+                if (xxiiiTypingTimer) clearInterval(xxiiiTypingTimer);
+                descElement.innerText = '';
+                let charIndex = 0;
+                descElement.classList.add('typing-cursor');
+                xxiiiTypingTimer = setInterval(() => {
+                    if (charIndex < node.desc.length) {
+                        descElement.innerText += node.desc.charAt(charIndex);
+                        charIndex++;
+                    } else {
+                        clearInterval(xxiiiTypingTimer);
+                        descElement.classList.remove('typing-cursor');
+                    }
+                }, 15);
+                
+                document.getElementById('step-indicator').innerText = `${xxiiiCurrentStep + 1} / ${xxiiiBriefingSequence.length}`;
+                document.getElementById('btn-prev').disabled = xxiiiCurrentStep === 0;
+                document.getElementById('btn-next').disabled = xxiiiCurrentStep === xxiiiBriefingSequence.length - 1;
+            };
+
+            window.xxiiiStartBriefing = function() {
+                xxiiiCurrentStep = 0;
+                xxiiiShowData(xxiiiBriefingSequence[xxiiiCurrentStep]);
+            };
+
+            window.xxiiiNavStep = function(direction) {
+                const nextStep = xxiiiCurrentStep + direction;
+                if (nextStep >= 0 && nextStep < xxiiiBriefingSequence.length) {
+                    xxiiiCurrentStep = nextStep;
+                    xxiiiShowData(xxiiiBriefingSequence[xxiiiCurrentStep]);
+                }
+            };
+
+            window.xxiiiToggleMap = function() {
+                const mapContainer = document.getElementById('xxiii-geopol-map');
+                const btn = document.getElementById('btn-toggle-map');
+                mapContainer.classList.toggle('map-visible');
+                
+                if (mapContainer.classList.contains('map-visible')) {
+                    btn.innerText = "Ocultar Topología";
+                    btn.classList.add('active');
+                } else {
+                    btn.innerText = "Proyectar Topología";
+                    btn.classList.remove('active');
+                }
+            };
+
+            window.xxiiiFilterNodes = function(layer, btnElement) {
+                document.querySelectorAll(".filter-btn").forEach(b => {
+                    if (b.id !== 'btn-toggle-map') b.classList.remove("active");
+                });
+                if (btnElement) btnElement.classList.add("active");
+                
+                document.querySelectorAll(".node").forEach(node => {
+                    if(layer === "all" || node.getAttribute("data-layer") === layer) {
+                        node.classList.remove("dimmed");
+                    } else {
+                        node.classList.add("dimmed");
+                    }
+                });
+            };
+
+            window.xxiiiTriggerOmega = function() {
+                const omegaScreen = document.getElementById('omega-screen');
+                omegaScreen.classList.add('active');
+                
+                const omegaTitle = document.getElementById('omega-title');
+                const omegaText = document.getElementById('omega-text');
+                const omegaFooter = document.getElementById('omega-footer');
+                
+                omegaTitle.classList.remove('opacity-0');
+                omegaFooter.classList.remove('opacity-0');
+                
+                const message = "INICIANDO SECUENCIA OMEGA. TODOS LOS NODOS DE FRICCIÓN HAN SIDO APAGADOS. EL SISTEMA SE DESCONECTA DEL CIBERESPACIO. LA MATERIA INERTE PERMANECE. FIN DEL BRIEFING TÁCTICO.";
+                
+                omegaText.innerText = '';
+                let charIndex = 0;
+                omegaText.classList.add('typing-cursor');
+                
+                const timer = setInterval(() => {
+                    if (charIndex < message.length) {
+                        omegaText.innerText += message.charAt(charIndex);
+                        charIndex++;
+                    } else {
+                        clearInterval(timer);
+                        omegaText.classList.remove('typing-cursor');
+                    }
+                }, 30);
+            };
+        })();
+    </script>
+</body>
+</html>

@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estabilizador Cromático — Pozo Azul</title>
+    <!-- Google Fonts Poppins -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #fbfaf5;
+            color: #1c1c1c;
+            font-family: 'Poppins', sans-serif;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        
+        .main-container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px 20px;
+            box-sizing: border-box;
+        }
+
+        .app-card {
+            width: 100%;
+            max-width: 1000px;
+            background-color: #ffffff;
+            border: 2px solid #d1cfc0;
+            border-radius: 24px 0 24px 0; /* Leaf style XXIII */
+            padding: 40px;
+            box-shadow: none; /* Flat design */
+            position: relative;
+        }
+
+        /* Estilos del Estabilizador encapsulados */
+        #ironforge-app {
+            --brand-bg: #ffffff;
+            --brand-text: #1c1c1c;
+            --brand-muted: #51514d; /* Gris de XXIII */
+            --brand-border: #d1cfc0; /* Borde crema-gris de XXIII */
+            --brand-accent: #004c7d; /* Azul de Innovación XXIII */
+            
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--brand-bg);
+            color: var(--brand-text);
+            width: 100%;
+            box-sizing: border-box;
+        }
+        #ironforge-app * {
+            box-sizing: border-box;
+        }
+        #ironforge-app .if-header {
+            border-bottom: 2px solid var(--brand-accent);
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        #ironforge-app .if-title {
+            margin: 0;
+            font-size: 32px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: -0.5px;
+            color: var(--brand-text);
+        }
+        #ironforge-app .if-title span {
+            color: var(--brand-accent);
+        }
+        #ironforge-app .if-subtitle {
+            margin: 8px 0 0 0;
+            color: var(--brand-muted);
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        /* Controles Input */
+        #ironforge-app .if-controls {
+            display: flex;
+            gap: 20px;
+            background: rgba(0, 76, 125, 0.04);
+            padding: 25px;
+            border-radius: 12px 0 12px 0; /* Leaf border radius */
+            border: 1px solid var(--brand-border);
+            margin-bottom: 40px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        #ironforge-app .if-input-group {
+            flex: 1;
+            min-width: 250px;
+        }
+        #ironforge-app label {
+            display: block;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--brand-muted);
+            margin-bottom: 8px;
+            font-weight: 800;
+        }
+        #ironforge-app .if-input-wrapper {
+            display: flex;
+            gap: 10px;
+        }
+        #ironforge-app input[type="text"] {
+            flex: 1;
+            background: var(--brand-bg);
+            border: 1px solid var(--brand-border);
+            color: var(--brand-accent);
+            padding: 12px 15px;
+            border-radius: 8px 0 8px 0; /* Leaf border radius */
+            font-family: 'Poppins', sans-serif;
+            font-size: 20px;
+            font-weight: 800;
+            text-transform: uppercase;
+            outline: none;
+            transition: all 0.2s;
+        }
+        #ironforge-app input[type="text"]:focus {
+            border-color: var(--brand-accent);
+        }
+        #ironforge-app input[type="color"] {
+            width: 54px;
+            height: 54px;
+            border: none;
+            border-radius: 8px 0 8px 0; /* Leaf border radius */
+            cursor: pointer;
+            background: none;
+            padding: 0;
+        }
+        #ironforge-app input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+        #ironforge-app input[type="color"]::-webkit-color-swatch { border: 1px solid var(--brand-border); border-radius: 8px 0 8px 0; }
+
+        /* Preview Original */
+        #ironforge-app .if-original-preview {
+            width: 220px;
+            text-align: center;
+            padding-left: 20px;
+            border-left: 1px dashed var(--brand-border);
+        }
+        #ironforge-app .if-color-box-main {
+            width: 100%;
+            height: 40px;
+            border-radius: 8px 0 8px 0;
+            margin-bottom: 8px;
+            border: 1px solid var(--brand-border);
+        }
+        #ironforge-app .if-rgb-text {
+            font-size: 13px;
+            color: var(--brand-text);
+            font-family: monospace;
+            font-weight: 600;
+        }
+
+        /* Grid de Salida */
+        #ironforge-app .if-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 25px;
+        }
+        #ironforge-app .if-card {
+            background: var(--brand-bg);
+            border: 1px solid var(--brand-border);
+            border-radius: 16px 0 16px 0; /* Leaf style */
+            padding: 25px;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+        #ironforge-app .if-card:hover {
+            transform: translateY(-2px);
+            border-color: var(--brand-muted);
+        }
+        #ironforge-app .if-card.featured {
+            border-color: var(--brand-accent);
+            border-width: 2px;
+            background: rgba(0, 76, 125, 0.02);
+        }
+        #ironforge-app .if-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+        #ironforge-app .if-card-title {
+            font-size: 15px;
+            font-weight: 800;
+            margin: 0;
+            text-transform: uppercase;
+            color: var(--brand-text);
+        }
+        #ironforge-app .if-card.featured .if-card-title {
+            color: var(--brand-accent);
+        }
+        #ironforge-app .if-card-desc {
+            font-size: 12px;
+            color: var(--brand-muted);
+            margin: 4px 0 0 0;
+            font-weight: 600;
+        }
+        #ironforge-app .if-copy-badge {
+            font-size: 10px;
+            background: var(--brand-text);
+            color: var(--brand-bg);
+            padding: 4px 8px;
+            border-radius: 4px 0 4px 0;
+            font-weight: 800;
+            opacity: 0;
+            transition: opacity 0.2s;
+            letter-spacing: 0.5px;
+        }
+        #ironforge-app .if-card:hover .if-copy-badge { opacity: 1; }
+        #ironforge-app .if-card.featured .if-copy-badge {
+            background: var(--brand-accent);
+        }
+        #ironforge-app .if-color-preview {
+            width: 100%;
+            height: 90px;
+            border-radius: 12px 0 12px 0;
+            margin-bottom: 20px;
+            border: 1px solid var(--brand-border);
+        }
+        #ironforge-app .if-card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+        #ironforge-app .if-hex-result {
+            font-size: 26px;
+            font-weight: 800;
+            margin: 0;
+            color: var(--brand-text);
+        }
+        #ironforge-app .if-card.featured .if-hex-result {
+            color: var(--brand-accent);
+        }
+        #ironforge-app .if-delta-result {
+            font-size: 12px;
+            color: var(--brand-muted);
+            font-family: monospace;
+            font-weight: 600;
+            text-align: right;
+        }
+
+        /* Alerta Toast */
+        #ironforge-app .if-toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: var(--brand-text);
+            color: var(--brand-bg);
+            padding: 14px 28px;
+            border-radius: 8px 0 8px 0;
+            font-weight: 800;
+            font-size: 14px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 9999;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        #ironforge-app .if-toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        /* Footer Disclaimer */
+        .footer-disclaimer {
+            margin-top: 40px;
+            border-top: 1px solid #d1cfc0;
+            padding-top: 20px;
+            font-size: 11px;
+            color: #51514d;
+            font-style: italic;
+            text-align: center;
+            line-height: 1.6;
+        }
+        .footer-disclaimer a {
+            color: #004c7d;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .footer-disclaimer a:hover {
+            text-decoration: underline;
+        }
+        
+        @media (max-width: 768px) {
+            .app-card { padding: 20px; border-radius: 16px 0 16px 0; }
+            #ironforge-app .if-controls { flex-direction: column; align-items: stretch; }
+            #ironforge-app .if-original-preview { width: 100%; padding-left: 0; border-left: none; border-top: 1px dashed var(--brand-border); padding-top: 20px; margin-top: 10px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <div class="app-card">
+            
+            <div id="ironforge-app">
+                <div class="if-header">
+                    <h1 class="if-title">Estabilizador <span>Cromático</span></h1>
+                    <p class="if-subtitle">Traducción Matemática. Forja de códigos HEX inmutables.</p>
+                </div>
+
+                <div class="if-controls">
+                    <div class="if-input-group">
+                        <label>Código HEX Crudo (CMYK Traducido)</label>
+                        <div class="if-input-wrapper">
+                            <input type="text" id="if-hex-input" value="e6edf1" placeholder="E6EDF1">
+                            <input type="color" id="if-color-picker" value="#e6edf1">
+                        </div>
+                    </div>
+                    
+                    <div class="if-original-preview">
+                        <label>ADN Original</label>
+                        <div id="if-orig-preview" class="if-color-box-main" style="background-color: #e6edf1;"></div>
+                        <div id="if-orig-rgb" class="if-rgb-text">R:230 | G:237 | B:241</div>
+                    </div>
+                </div>
+
+                <div class="if-grid">
+                    <!-- Variante 1: Par -->
+                    <div class="if-card" onclick="ifCopyHex('if-hex-par')">
+                        <div class="if-card-header">
+                            <div>
+                                <h3 class="if-card-title">01. Sutil (Pares)</h3>
+                                <p class="if-card-desc">Mínima fricción. Redondeo par.</p>
+                            </div>
+                            <span class="if-copy-badge">COPIAR</span>
+                        </div>
+                        <div id="if-prev-par" class="if-color-preview"></div>
+                        <div class="if-card-footer">
+                            <h4 id="if-hex-par" class="if-hex-result">#000000</h4>
+                            <div id="if-delta-par" class="if-delta-result">ΔR:0 ΔG:0 ΔB:0</div>
+                        </div>
+                    </div>
+
+                    <!-- Variante 2: Múltiplo de 5 -->
+                    <div class="if-card" onclick="ifCopyHex('if-hex-cinco')">
+                        <div class="if-card-header">
+                            <div>
+                                <h3 class="if-card-title">02. Decimal (Múlt 5)</h3>
+                                <p class="if-card-desc">Anclaje intermedio y estable.</p>
+                            </div>
+                            <span class="if-copy-badge">COPIAR</span>
+                        </div>
+                        <div id="if-prev-cinco" class="if-color-preview"></div>
+                        <div class="if-card-footer">
+                            <h4 id="if-hex-cinco" class="if-hex-result">#000000</h4>
+                            <div id="if-delta-cinco" class="if-delta-result">ΔR:0 ΔG:0 ΔB:0</div>
+                        </div>
+                    </div>
+
+                    <!-- Variante 3: Múltiplo de 8 (JPEG) -->
+                    <div class="if-card featured" onclick="ifCopyHex('if-hex-ocho')">
+                        <div class="if-card-header">
+                            <div>
+                                <h3 class="if-card-title">03. Blindaje JPEG</h3>
+                                <p class="if-card-desc">Dogma Digital (Múltiplo 8).</p>
+                            </div>
+                            <span class="if-copy-badge">COPIAR</span>
+                        </div>
+                        <div id="if-prev-ocho" class="if-color-preview"></div>
+                        <div class="if-card-footer">
+                            <h4 id="if-hex-ocho" class="if-hex-result">#000000</h4>
+                            <div id="if-delta-ocho" class="if-delta-result">ΔR:0 ΔG:0 ΔB:0</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="if-toast" class="if-toast">HEX COPIADO</div>
+            </div>
+
+            <!-- DISCLAIMER DE MARCA/AUTORÍA ASISTIDA -->
+            <div class="footer-disclaimer">
+                * Esta aplicación es de código abierto. Creada mediante Vibe Coding (programación asistida por IA) con ayuda de Gemini y Antigravity. Se otorga permiso total de modificación, mejora y reedición. Si desarrollas tu propia versión o un proyecto derivado, contáctanos en <a href="mailto:hola@xxiiimagazine.com">hola@xxiiimagazine.com</a> para ver tu proyecto y sumarlo a Pozo Azul. La mayoría de este código fue generado por Vibe Coding.
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            const hexInput = document.getElementById('if-hex-input');
+            const colorPicker = document.getElementById('if-color-picker');
+            
+            function cleanHex(hex) {
+                return hex.replace(/[^0-9a-fA-F]/g, '');
+            }
+
+            function hexToRgb(hex) {
+                let clean = cleanHex(hex);
+                if (clean.length === 3) clean = clean.split('').map(char => char + char).join('');
+                const bigint = parseInt(clean, 16);
+                if (isNaN(bigint)) return null;
+                return { r: (bigint >> 16) & 255, g: (bigint >> 8) & 255, b: bigint & 255 };
+            }
+
+            function rgbToHex(r, g, b) {
+                const toHex = (c) => {
+                    const hex = Math.max(0, Math.min(255, c)).toString(16);
+                    return hex.length === 1 ? '0' + hex : hex;
+                };
+                return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+            }
+
+            function roundToNearest(val, multiple) {
+                return Math.round(val / multiple) * multiple;
+            }
+
+            function getDeltaString(origRgb, newRgb) {
+                const dR = newRgb.r - origRgb.r;
+                const dG = newRgb.g - origRgb.g;
+                const dB = newRgb.b - origRgb.b;
+                
+                const format = (n) => n > 0 ? `+${n}` : n;
+                return `ΔR:${format(dR)} ΔG:${format(dG)} ΔB:${format(dB)}`;
+            }
+
+            function updateUI(hexVal) {
+                let hex = cleanHex(hexVal);
+                if (hex.length === 3) hex = hex.split('').map(char => char + char).join('');
+                if (hex.length !== 6) return;
+
+                const rgb = hexToRgb(hex);
+                if (!rgb) return;
+
+                // Original
+                document.getElementById('if-orig-preview').style.backgroundColor = `#${hex}`;
+                document.getElementById('if-orig-rgb').innerText = `R:${rgb.r} | G:${rgb.g} | B:${rgb.b}`;
+
+                // Par
+                const rgb2 = { r: roundToNearest(rgb.r, 2), g: roundToNearest(rgb.g, 2), b: roundToNearest(rgb.b, 2) };
+                const hex2 = rgbToHex(rgb2.r, rgb2.g, rgb2.b);
+                document.getElementById('if-prev-par').style.backgroundColor = hex2;
+                document.getElementById('if-hex-par').innerText = hex2.toUpperCase();
+                document.getElementById('if-delta-par').innerText = getDeltaString(rgb, rgb2);
+
+                // Múltiplo de 5
+                const rgb5 = { r: roundToNearest(rgb.r, 5), g: roundToNearest(rgb.g, 5), b: roundToNearest(rgb.b, 5) };
+                const hex5 = rgbToHex(rgb5.r, rgb5.g, rgb5.b);
+                document.getElementById('if-prev-cinco').style.backgroundColor = hex5;
+                document.getElementById('if-hex-cinco').innerText = hex5.toUpperCase();
+                document.getElementById('if-delta-cinco').innerText = getDeltaString(rgb, rgb5);
+
+                // JPEG (Múltiplo de 8)
+                const rgb8 = { r: roundToNearest(rgb.r, 8), g: roundToNearest(rgb.g, 8), b: roundToNearest(rgb.b, 8) };
+                const hex8 = rgbToHex(rgb8.r, rgb8.g, rgb8.b);
+                document.getElementById('if-prev-ocho').style.backgroundColor = hex8;
+                document.getElementById('if-hex-ocho').innerText = hex8.toUpperCase();
+                document.getElementById('if-delta-ocho').innerText = getDeltaString(rgb, rgb8);
+            }
+
+            hexInput.addEventListener('input', (e) => {
+                let rawVal = e.target.value;
+                let val = cleanHex(rawVal).substring(0, 6);
+                
+                if (rawVal !== val && rawVal !== '#' + val) {
+                    e.target.value = val;
+                }
+
+                let pickerVal = val;
+                if (pickerVal.length === 3) pickerVal = pickerVal.split('').map(char => char + char).join('');
+                colorPicker.value = pickerVal.length === 6 ? `#${pickerVal.toLowerCase()}` : '#000000';
+                updateUI(val);
+            });
+
+            colorPicker.addEventListener('input', (e) => {
+                const val = cleanHex(e.target.value);
+                hexInput.value = val;
+                updateUI(val);
+            });
+
+            window.ifCopyHex = function(elementId) {
+                const hexText = document.getElementById(elementId).innerText;
+                const tempInput = document.createElement('input');
+                tempInput.value = hexText;
+                document.body.appendChild(tempInput);
+                tempInput.select();
+                document.execCommand('copy');
+                document.body.removeChild(tempInput);
+                
+                const toast = document.getElementById('if-toast');
+                toast.innerText = `${hexText} COPIADO AL PORTAPAPELES`;
+                toast.classList.add('show');
+                setTimeout(() => { toast.classList.remove('show'); }, 2500);
+            };
+
+            // Init
+            updateUI('e6edf1');
+        })();
+    </script>
+</body>
+</html>
