@@ -799,7 +799,11 @@
             if (leader.avatarImg && leader.avatarImg.trim() !== '') {
                 let imgUrl = leader.avatarImg;
                 if (!imgUrl.startsWith('http://') && !imgUrl.startsWith('https://')) {
-                    imgUrl = (typeof XXIII_ASSETS_URL !== 'undefined' ? XXIII_ASSETS_URL : '') + imgUrl;
+                    if (typeof XXIII_MEDIA_LIBRARY_MAP !== 'undefined' && XXIII_MEDIA_LIBRARY_MAP[imgUrl]) {
+                        imgUrl = XXIII_MEDIA_LIBRARY_MAP[imgUrl];
+                    } else {
+                        imgUrl = (typeof XXIII_ASSETS_URL !== 'undefined' ? XXIII_ASSETS_URL : '') + imgUrl;
+                    }
                 }
                 return `<img src="${imgUrl}" alt="${leader.name}" class="w-full h-full object-cover" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                         <div class="w-full h-full flex items-center justify-center ${bgClass} text-white font-bold text-xs" style="display: none;">${leader.avatarText}</div>`;
