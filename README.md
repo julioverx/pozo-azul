@@ -18,6 +18,11 @@ Un visor táctico interactivo que mapea los puntos neurales de fricción global,
 - **Características:** Capas interactivas, animación CRT digital, secuenciaOmega de simulación de desconexión y briefing automatizado paso a paso.
 - **Tecnologías:** HTML5, CSS3, Tailwind CSS (vía CDN) y JavaScript de control táctico.
 
+### 3. Reconstrucción Histórica y Mercado Laboral (`/linea-de-tiempo-interactiva`)
+Un visor cronológico e interactivo que analiza la gobernabilidad y la evolución del mercado de trabajo en Venezuela y el estado Apure (1989-2026).
+- **Características:** Reconstrucción detallada de 15 hitos independientes, panel de detalles (Estructura de Poder, Impacto Laboral, Modelado Estadístico con Chart.js y Generación de Láminas), y exportador automatizado a diapositivas JPG con dimensiones de diseño fijas (1024x576).
+- **Tecnologías:** HTML5, CSS3, Tailwind CSS (vía CDN), Chart.js, GSAP, html2canvas y JavaScript Vanilla.
+
 ---
 
 ## 🔮 Metodología: Vibe Coding y Desarrollo Asistido por IA

@@ -1,0 +1,1499 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Línea de Tiempo Político-Militar y Mercado Laboral (1996-2026) — XXIII Magazine</title>
+    <!-- Google Fonts Poppins -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- GSAP CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <!-- html2canvas CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'xxiii-dark-bg': '#1c1c1c',       /* Negro base */
+                        'xxiii-cream': '#f5f5f7',         /* Blanco */
+                        'xxiii-blue': '#004c7d',          /* Azul base */
+                        'xxiii-blue-dark': '#0e344d',     /* Azul oscuro */
+                        'xxiii-blue-medium': '#152834',   /* Azul medio */
+                        'xxiii-blue-accent': '#3d7596',   /* Acento azul */
+                        'xxiii-blue-lighter': '#799eb0',  /* Acento claro */
+                        'xxiii-cream-accent': '#b5c7c9',  /* Acento crema */
+                        'xxiii-border': 'rgba(61, 117, 150, 0.3)', /* Borde semi-transparente */
+                    },
+                    fontFamily: {
+                        sans: ['Poppins', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #1c1c1c;
+            color: #f5f5f7;
+            font-family: 'Poppins', sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* Diseño libre sin cajas cerradas y con acentos de borde izquierdo */
+        .xxiii-card-free {
+            background-color: rgba(21, 40, 52, 0.15); /* #152834 con opacidad */
+            border-left: 2.5px solid #3d7596;
+            border-radius: 0 12px 12px 0;
+            box-shadow: none;
+        }
+
+        /* Pestañas planas */
+        .xxiii-btn {
+            background-color: transparent;
+            border: none;
+            border-bottom: 2px solid transparent;
+            color: #b5b5be;
+            border-radius: 0;
+            transition: all 0.2s ease;
+            box-shadow: none;
+        }
+        .xxiii-btn:hover {
+            color: #799eb0;
+            border-bottom-color: #3d7596;
+        }
+        .xxiii-btn.active {
+            background-color: transparent;
+            border-bottom: 2px solid #004c7d;
+            color: #f5f5f7;
+        }
+
+        /* Timeline Nodes con forma de hoja (rounded-[12px_0_12px_0]) */
+        .timeline-node {
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .timeline-dot {
+            border-radius: 12px 0 12px 0;
+            border: 2px solid rgba(61, 117, 150, 0.3);
+            transition: all 0.2s ease;
+        }
+        .timeline-node.active .timeline-dot {
+            border-color: #799eb0 !important;
+            box-shadow: 0 0 12px rgba(121, 158, 176, 0.6);
+            transform: scale(1.15);
+            border-radius: 12px 0 12px 0; /* Mantiene la forma de hoja al escalar */
+        }
+        .timeline-node:hover .timeline-dot {
+            border-color: #799eb0 !important;
+        }
+        .timeline-node.active h4 {
+            color: #799eb0 !important;
+        }
+
+        /* Máscara de degradado (Fade Scroll) arriba y abajo del contenedor */
+        .timeline-mask {
+            -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%);
+            mask-image: linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%);
+        }
+
+        /* Scrollbar ocultable en hover */
+        .scroll-container {
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        .scroll-container::-webkit-scrollbar {
+            width: 4px;
+            display: none;
+        }
+        .scroll-container:hover::-webkit-scrollbar {
+            display: block;
+        }
+        .scroll-container:hover::-webkit-scrollbar-thumb {
+            background-color: rgba(255, 255, 255, 0.15);
+            border-radius: 2px;
+        }
+
+        /* Modo Claro overrides */
+        body.light-theme {
+            background-color: #f2f0e3 !important;
+            color: #1c1c1c !important;
+        }
+
+        body.light-theme h1,
+        body.light-theme h2,
+        body.light-theme h3,
+        body.light-theme h4 {
+            color: #1c1c1c !important;
+        }
+
+        body.light-theme p,
+        body.light-theme span:not(.text-xxiii-blue-lighter):not(.text-\[\#799eb0\]) {
+            color: #152834 !important;
+        }
+
+        body.light-theme .text-\[\#b5b5be\] {
+            color: #55555e !important;
+        }
+
+        body.light-theme .text-xxiii-blue-lighter,
+        body.light-theme .text-\[\#799eb0\] {
+            color: #004c7d !important;
+        }
+
+        body.light-theme .xxiii-card-free {
+            background-color: rgba(0, 76, 125, 0.05) !important;
+            border-left-color: #004c7d !important;
+            border-top: 1px solid rgba(0, 76, 125, 0.08);
+            border-right: 1px solid rgba(0, 76, 125, 0.08);
+            border-bottom: 1px solid rgba(0, 76, 125, 0.08);
+        }
+
+        body.light-theme .xxiii-btn {
+            color: #55555e;
+        }
+
+        body.light-theme .xxiii-btn.active {
+            color: #004c7d !important;
+            border-bottom-color: #004c7d !important;
+        }
+
+        body.light-theme .xxiii-btn:hover {
+            color: #004c7d;
+        }
+
+        body.light-theme #details-section {
+            background-color: #f2f0e3 !important;
+        }
+
+        body.light-theme #slide-capture-area {
+            background-color: #f2f0e3 !important;
+            color: #1c1c1c !important;
+        }
+
+        body.light-theme #slide-capture-area .border-b,
+        body.light-theme #slide-capture-area .border-t,
+        body.light-theme #slide-capture-area .border-r {
+            border-color: rgba(0, 76, 125, 0.2) !important;
+        }
+
+        body.light-theme #slide-logo {
+            color: #004c7d !important;
+        }
+
+        body:not(.light-theme) #slide-logo {
+            color: #f2f0e3 !important;
+        }
+
+        body.light-theme #bio-card {
+            background-color: #f2f0e3 !important;
+            border-color: rgba(0, 76, 125, 0.2) !important;
+        }
+
+        body.light-theme .timeline-dot {
+            background-color: #f2f0e3 !important;
+            border-color: rgba(0, 76, 125, 0.2) !important;
+        }
+
+        body.light-theme .timeline-node.active .timeline-dot {
+            border-color: #004c7d !important;
+            box-shadow: 0 0 6px rgba(0, 76, 125, 0.3) !important;
+            border-radius: 12px 0 12px 0;
+        }
+
+        body.light-theme .bg-\[\#152834\]\/15,
+        body.light-theme .bg-\[\#152834\]\/20,
+        body.light-theme .bg-\[\#152834\]\/30 {
+            background-color: rgba(0, 76, 125, 0.06) !important;
+            border-color: rgba(0, 76, 125, 0.15) !important;
+        }
+
+        body.light-theme .border-\[\#3d7596\]\/30,
+        body.light-theme .border-\[\#3d7596\]\/20 {
+            border-color: rgba(0, 76, 125, 0.2) !important;
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8 min-h-screen flex flex-col justify-between">
+
+    <!-- CABECERA (Compactada por requerimiento) -->
+    <header class="max-w-7xl mx-auto w-full mb-4 pb-3 border-b border-[#3d7596]/30">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div>
+                <span class="text-[10px] uppercase tracking-widest text-[#799eb0] font-bold">Investigación Académica & Realidad Nacional</span>
+                <h1 class="text-lg md:text-xl font-extrabold text-[#f5f5f7] tracking-tight mt-0.5 uppercase">Reconstrucción Histórica y Mercado Laboral</h1>
+                <p class="text-[11px] md:text-xs text-[#b5b5be] mt-1 max-w-3xl leading-relaxed">
+                    Análisis comparativo de la gobernabilidad en <strong>Venezuela</strong> y el <strong>Estado Apure (1989 - 2026)</strong>. Estudio empírico sobre la debilidad institucional y la desprofesionalización laboral.
+                </p>
+            </div>
+            <button onclick="toggleTheme()" id="theme-toggle" class="bg-[#152834]/20 border border-[#3d7596]/30 rounded-[4px_0_4px_0] px-3 py-1.5 text-[10px] text-[#799eb0] hover:text-[#b5c7c9] hover:bg-[#3d7596]/20 transition-all flex items-center gap-1.5 font-bold uppercase tracking-wider font-mono">
+                <i data-lucide="sun" class="w-3.5 h-3.5" id="theme-icon"></i>
+                <span id="theme-text">Modo Claro</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- CUERPO PRINCIPAL -->
+    <main class="max-w-7xl mx-auto w-full flex-1 flex flex-col lg:flex-row gap-8 items-start mb-8 relative">
+        
+        <!-- Línea de ramificación omitida por requerimiento -->
+        
+        <!-- COLUMNA IZQUIERDA: Cronología (Centrada por defecto, se contrae al abrir el HUD) -->
+        <section id="timeline-section" class="w-full lg:w-full max-w-xl mx-auto p-6 h-[600px] flex flex-col justify-between overflow-hidden relative transition-all duration-500 ease-in-out">
+            <div class="border-b border-[#3d7596]/20 pb-3 mb-4 flex items-center justify-between">
+                <div>
+                    <h2 class="text-base font-extrabold uppercase text-[#799eb0] tracking-wide">Cronología (1989-2026)</h2>
+                    <p class="text-[10px] text-[#b5b5be]">Selecciona un hito para auditar los impactos locales.</p>
+                </div>
+                <i data-lucide="clock" class="text-[#799eb0] w-4 h-4"></i>
+            </div>
+
+            <!-- Contenedor scrollable de hitos con máscara de degradado y paddings ajustados -->
+            <div class="flex-1 overflow-y-auto pl-4 pr-2 pt-12 pb-12 scroll-container relative timeline-mask" id="timeline-ui">
+                <!-- Los hitos serán inyectados vía JavaScript -->
+            </div>
+        </section>
+
+        <!-- COLUMNA DERECHA: Detalle/HUD (Popup en móvil, columna en escritorio) -->
+        <section id="details-section" class="fixed inset-0 z-40 bg-[#1c1c1c] overflow-y-auto hidden p-6 pb-28 lg:relative lg:inset-auto lg:z-auto lg:bg-transparent lg:p-0 lg:w-0 lg:hidden lg:flex lg:flex-col gap-6 opacity-0 transition-all duration-500 ease-in-out">
+            <!-- Barra de Pestañas del Panel de Detalles -->
+            <div id="tab-bar" class="flex flex-wrap gap-2 mb-6 lg:mb-0 transition-all duration-300">
+                <button id="tab-power" onclick="switchTab('power')" class="xxiii-btn active px-4 py-2 text-xs font-bold uppercase tracking-wider flex items-center gap-2">
+                    <i data-lucide="shield" class="w-3.5 h-3.5"></i> Estructura de Poder
+                </button>
+                <button id="tab-talent" onclick="switchTab('talent')" class="xxiii-btn px-4 py-2 text-xs font-bold uppercase tracking-wider flex items-center gap-2">
+                    <i data-lucide="users" class="w-3.5 h-3.5"></i> Impacto Laboral
+                </button>
+                <button id="tab-chart" onclick="switchTab('chart')" class="xxiii-btn px-4 py-2 text-xs font-bold uppercase tracking-wider flex items-center gap-2">
+                    <i data-lucide="trending-up" class="w-3.5 h-3.5"></i> Tendencias e Índices
+                </button>
+                <button id="tab-slide" onclick="switchTab('slide')" class="xxiii-btn px-4 py-2 text-xs font-bold uppercase tracking-wider flex items-center gap-2">
+                    <i data-lucide="presentation" class="w-3.5 h-3.5"></i> Generar Diapositiva
+                </button>
+            </div>
+
+            <!-- Panel de Contenido Principal (Estilo Libre) -->
+            <div class="xxiii-card-free p-6 md:p-8 min-h-0 lg:min-h-[520px] flex flex-col justify-start gap-6 relative z-10" id="content-panel">
+                <!-- Inyectado dinámicamente por JavaScript -->
+            </div>
+        </section>
+
+    </main>
+
+    <!-- MODAL BIOGRÁFICO DE LÍDERES -->
+    <div id="bio-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden">
+        <!-- Backdrop independiente para evitar rasterizado borroso del texto -->
+        <div class="absolute inset-0 bg-[#1c1c1c]/90 backdrop-blur-sm" onclick="closeBioModal()"></div>
+        
+        <!-- Card de Contenido -->
+        <div id="bio-card" class="xxiii-card-free max-w-xl w-full p-8 relative max-h-[85vh] overflow-y-auto scroll-container bg-[#1c1c1c] border border-[#3d7596]/30 z-10" onclick="event.stopPropagation()">
+            <button class="absolute top-4 right-4 text-3xl font-light text-[#b5b5be] hover:text-[#799eb0] transition-colors" onclick="closeBioModal()">&times;</button>
+            <div class="flex items-start gap-4 mb-4 pb-4 border-b border-[#3d7596]/20">
+                <div class="w-16 h-16 rounded-[4px_0_4px_0] overflow-hidden border border-[#3d7596]/30 bg-[#1c1c1c] flex-shrink-0" id="modal-avatar-box">
+                    <!-- Avatar del modal -->
+                </div>
+                <div>
+                    <span class="text-[9px] uppercase font-bold tracking-widest text-[#799eb0]" id="modal-role-label">Cargo</span>
+                    <h3 class="text-lg font-extrabold uppercase text-[#f5f5f7] tracking-tight mt-0.5" id="modal-name">Nombre</h3>
+                    <p class="text-xs text-[#b5b5be] font-mono mt-0.5" id="modal-party">Filiación Política</p>
+                </div>
+            </div>
+            <div class="text-xs md:text-sm text-[#b5b5be] leading-relaxed space-y-4" id="modal-bio-content">
+                <!-- Contenido de la bio -->
+            </div>
+        </div>
+    </div>
+
+    <!-- PIE DE PÁGINA (Disclaimer) -->
+    <footer class="max-w-7xl mx-auto w-full border-t border-[#3d7596]/20 pt-4 text-center text-[10px] text-[#b5b5be] italic leading-relaxed">
+        * Esta aplicación interactiva es un prototipo local de código abierto para visualización académica. Creada con la asistencia de Gemini y Antigravity mediante Vibe Coding. Se otorga permiso completo de copia, reedición y remezcla. La mayoría de este código fue generado por Vibe Coding. Redacción de XXIII Magazine. Si quieres aportar con tus proyectos, escríbenos a hola@xxiiimagazine.com.
+    </footer>
+
+    <!-- LÓGICA DE DATOS Y RENDERIZADO -->
+    <script>
+        // Estructura de Datos sin caracteres Markdown, con imágenes locales y fuentes documentales específicas
+        const timelineData = [
+            {
+                id: '1989-1992',
+                years: '1989 - 1992',
+                title: 'Descentralización',
+                shortDesc: 'Elección del primer gobernador popular de Apure.',
+                source: 'COPRE (Reporte N° 1, 1989) "La Descentralización: una oportunidad para la democracia" / CNE "Elecciones Regionales de Venezuela de 1989" (AD: 56.55% en Apure)',
+                national: {
+                    name: 'Carlos Andrés Pérez',
+                    role: 'Presidente de la República (Acción Democrática)',
+                    context: 'Tras las presiones de la COPRE y la devaluación del Bolívar en 1989, promulgó la Ley de Elección de Gobernadores, poniendo fin a la designación presidencial "a dedo" de los mandatarios regionales.',
+                    avatarText: 'CAP',
+                    avatarImg: 'carlos_andres_perez.webp',
+                    bio: 'Carlos Andrés Pérez (1922-2010) fue dos veces Presidente de la República. Su segundo mandato (1989-1993) estuvo marcado por reformas económicas de apertura, el Caracazo y dos intentos de golpe de Estado en 1992.'
+                },
+                regional: {
+                    name: 'José Gregorio Montilla',
+                    role: 'Gobernador de Apure (Acción Democrática)',
+                    context: 'Primer gobernador electo por voto popular en Apure en diciembre de 1989, obteniendo el 56.55% de los sufragios, marcando el inicio de la autonomía administrativa regional.',
+                    avatarText: 'JM',
+                    avatarImg: 'jose_gregorio_montilla.webp',
+                    bio: 'José Gregorio Montilla fue un destacado caudillo de Acción Democrática. Se convirtió en el primer gobernador electo del estado Apure, abriendo el camino para el presupuesto local autónomo.'
+                },
+                impact: {
+                    title: 'Inicio del Servicio Civil y Autonomía Presupuestaria',
+                    points: [
+                        '<strong>Servicio Civil de Carrera:</strong> La instauración del voto regional crea el primer servicio civil de carrera en el estado Apure.',
+                        '<strong>Autonomía Financiera:</strong> Por primera vez, las instituciones locales gozan de presupuestos propios mediante el Situado Constitucional.',
+                        '<strong>Clientelismo Bipartidista:</strong> El arraigo de AD/COPEI mantiene estructuras de reclutamiento clientelar donde los cargos se asignan por militancia.'
+                    ]
+                }
+            },
+            {
+                id: '1992-1995',
+                years: '1992 - 1995',
+                title: 'Civilidad',
+                shortDesc: 'Consolidación de la alternancia de mando civil y regional.',
+                source: 'CNE "Elecciones Regionales de 1992" (AD - Marcelo Oquendo Rojo) / Saber ULA (2015) "Desarrollo, instituciones y gobernabilidad en Venezuela"',
+                national: {
+                    name: 'Carlos Andrés Pérez',
+                    role: 'Presidente de la República (Acción Democrática)',
+                    context: 'Su mandato colapsó en 1993 tras ser destituido por juicio político de malversación, sucediéndole interinamente Ramón J. Velásquez en medio de una severa inestabilidad.',
+                    avatarText: 'CAP',
+                    avatarImg: 'carlos_andres_perez.webp',
+                    bio: 'Carlos Andrés Pérez gobernó en medio de una gran inestabilidad política que culminó en su separación del cargo en mayo de 1993.'
+                },
+                regional: {
+                    name: 'Marcelo Oquendo Rojo',
+                    role: 'Gobernador de Apure (Acción Democrática)',
+                    context: 'Asume en 1992 tras ganar las elecciones regionales por Acción Democrática, consolidando la alternancia civil y manteniendo el Situado Constitucional regional.',
+                    avatarText: 'MO',
+                    avatarImg: 'marcelo_oquendo.webp',
+                    bio: 'Marcelo Oquendo Rojo fue gobernador de Apure (1992-1995), defendiendo el servicio civil llanero y la transferencia descentralizada de competencias agrícolas.'
+                },
+                impact: {
+                    title: 'Institucionalización de la Descentralización',
+                    points: [
+                        '<strong>Desarrollo del Servicio Pecuario:</strong> Se consolidan las direcciones agropecuarias regionales, permitiendo al talento veterinario laborar sin dependencia centralizada.',
+                        '<strong>Estabilidad Administrativa:</strong> A pesar de la caída del presidente Pérez, la gobernación de Apure mantiene su autonomía operativa y de gestión de personal.',
+                        '<strong>Bipartidismo Gremial:</strong> El control de los gremios de maestros y médicos sigue supeditado a las negociaciones con las tarjetas tradicionales de partido.'
+                    ]
+                }
+            },
+            {
+                id: '1996-1999',
+                years: '1996 - 1999',
+                title: 'Ocaso Bipartidista',
+                shortDesc: 'Fin de la gobernabilidad tradicional civil en Venezuela y Apure.',
+                source: 'Saber ULA "Revista Venezolana de Ciencia Política" (Ajustes de la Agenda Venezuela) / Saber UCV / Elecciones CNE (1995/1998) (AD - José Gregorio Montilla: 60.77% en 1995)',
+                national: {
+                    name: 'Rafael Caldera Rodríguez',
+                    role: 'Presidente de la República (Convergencia)',
+                    context: 'Ocaso de la democracia bipartidista del Pacto de Puntofijo. Enfrentó los efectos del colapso del sistema financiero de 1994, devaluación de la moneda e inestabilidad fiscal. En 1994 dictó el sobreseimiento de la causa judicial contra Hugo Chávez, abriendo paso a la alternancia electoral de 1998.',
+                    avatarText: 'RC',
+                    avatarImg: 'rafael_caldera.webp',
+                    bio: 'Rafael Caldera (1916-2009) fue dos veces Presidente de la República. Su segundo mandato (1994-1999) estuvo signado por la crisis económica, la aplicación del programa de ajuste fiscal "Agenda Venezuela" y un descrédito social profundo de los partidos tradicionales (AD y COPEI) que culminó con el ascenso electoral de Hugo Chávez.'
+                },
+                regional: {
+                    name: 'José Gregorio Montilla',
+                    role: 'Gobernador de Apure (Acción Democrática)',
+                    context: 'Gobernador electo con el 60.77% de los votos en 1995 y reelecto en 1998. Personificó el último ciclo de hegemonía regional de Acción Democrática, caracterizado por una gestión clientelar agropecuaria clásica y escasa inversión en infraestructura.',
+                    avatarText: 'JM',
+                    avatarImg: 'jose_gregorio_montilla.webp',
+                    bio: 'José Gregorio Montilla fue un destacado caudillo regional de Acción Democrática. Su administración dominó la política del estado llanero antes de la refundación constitucional chavista. Enfrentó las limitaciones fiscales del fin del puntofijismo y la descentralización administrativa.'
+                },
+                impact: {
+                    title: 'Desmotivación e Informalidad Laboral Inicial',
+                    points: [
+                        '<strong>Bipartidismo Clientelar:</strong> El ingreso laboral al sector público en Apure dependía enteramente de afiliaciones partidarias, limitando la incorporación de talento calificado independiente.',
+                        '<strong>Debilidad Salarial:</strong> La crisis fiscal nacional y el plan de ajuste redujeron el salario real de educadores y personal de salud regional.',
+                        '<strong>Fuga de Talentos Temprana:</strong> Comienzo de la migración interna de ingenieros y ganaderos hacia el centro del país por falta de incentivos productivos locales.'
+                    ]
+                }
+            },
+            {
+                id: '1999-2000',
+                years: '1999 - 2000',
+                title: 'Proceso Constituyente',
+                shortDesc: 'Aprobación de la nueva Carta Magna y refundación bolivariana.',
+                source: 'Constitución de la República Bolivariana de Venezuela (1999) / Saber UCV (Tesis Doctoral: "La defensa de la civilidad") / Elecciones Regionales CNE (1999) (MVR: 51.51% en Apure)',
+                national: {
+                    name: 'Hugo Chávez Frías',
+                    role: 'Presidente de la República (MVR)',
+                    context: 'Asumió en febrero de 1999. Convocó inmediatamente un referéndum constitucional que dio origen a la Constitución de 1999, aprobada el 15 de diciembre de ese año. Inició la refundación del Estado y la concentración progresiva de los poderes públicos en el ejecutivo.',
+                    avatarText: 'HC',
+                    avatarImg: 'hugo_chavez.webp',
+                    bio: 'Hugo Chávez (1954-2013) fue un militar y político que lideró el intento de golpe de Estado en 1992 y fue electo presidente en 1998. Su gobierno impulsó la Revolución Bolivariana, transformando la estructura constitucional de Venezuela e institucionalizando la centralización presidencial.'
+                },
+                regional: {
+                    name: 'Jesús Aguilarte Gámez',
+                    role: 'Gobernador de Apure (Movimiento Quinta República)',
+                    context: 'Electo en 1999 con el 51.51% de los sufragios, quebrando la hegemonía de Acción Democrática. Su gestión se abocó a alinear la administración local llanera con el nuevo modelo constituyente central de Caracas.',
+                    avatarText: 'JA',
+                    avatarImg: 'jesus_aguilarte.webp',
+                    bio: 'Jesús Aguilarte Gámez (1959-2012) fue capitán del Ejército y participante del alzamiento militar de 1992. Fue la punta de lanza del chavismo en Apure. Su mandato estuvo caracterizado por una fuerte retórica de confrontación y reestructuración institucional.'
+                },
+                impact: {
+                    title: 'Politicización del Empleo Público Llanero',
+                    points: [
+                        '<strong>Inicio del Activismo de Estado:</strong> Comienzo de la exigencia de simpatía ideológica para acceder y mantener cargos en las instituciones del estado Apure.',
+                        '<strong>Erosión del Mérito Profesional:</strong> La reestructuración burocrática priorizó la lealtad partidista sobre los antecedentes técnicos en las corporaciones de desarrollo agropecuario.',
+                        '<strong>Inestabilidad en la Burocracia:</strong> La disolución de los antiguos esquemas puntofijistas paralizó proyectos técnicos por el cambio repentino de autoridades locales.'
+                    ]
+                }
+            },
+            {
+                id: '2000-2004',
+                years: '2000 - 2004',
+                title: 'Cohabitación Tensa',
+                shortDesc: 'Único mandato de oposición regional en Apure en el siglo XXI.',
+                source: 'Saber UCV "Tesis Doctoral: Transgresión e Historicidad" / Elecciones Regionales CNE (2000) (AD - Luis Lippa: 48.37%) / Incidencia Nacional de la Lista Tascón en el Empleo Público (2003-2004)',
+                national: {
+                    name: 'Hugo Chávez / Pedro Carmona',
+                    role: 'Poder Nacional en Conflicto',
+                    context: 'Período de máxima polarización política. Superó el golpe de Estado de 2002 (asumiendo Pedro Carmona de facto por 47 horas), el paro petrolero de 2002-2003 y el referendo revocatorio de 2004. Inició la militarización del control estatal sobre PDVSA.',
+                    avatarText: 'HC',
+                    avatarImg: 'hugo_chavez.webp',
+                    bio: 'Durante esta era de extrema agitación, la cúpula militar y empresarial intentó destituir a Chávez en abril de 2002, juramentando a Pedro Carmona Estanga (quien disolvió los poderes públicos). El rápido retorno de Chávez y el control posterior de la industria petrolera consolidaron su dominio hegemónico definitivo.'
+                },
+                regional: {
+                    name: 'Luis Lippa',
+                    role: 'Gobernador de Apure (Acción Democrática)',
+                    context: 'Único triunfo electoral de la oposición en Apure en el siglo XXI (48.37% de votos). Su gestión sufrió un férreo boicot presupuestario del ejecutivo nacional, asfixia fiscal y persecución institucional por parte de las fuerzas del chavismo.',
+                    avatarText: 'LL',
+                    avatarImg: 'luis_lippa.webp',
+                    bio: 'Luis Lippa es un farmacéutico y dirigente político de Apure. Su período como gobernador representó un reducto de resistencia descentralizada frente al avance centralizador del MVR, experimentando sabotajes y recortes directos de transferencias constitucionales.'
+                },
+                impact: {
+                    title: 'Discriminación Laboral y la Lista Tascón',
+                    points: [
+                        '<strong>Despido Masivo de Especialistas:</strong> La purga de más de 18.000 profesionales de PDVSA tras el paro petrolero de 2003 desprofesionalizó las áreas técnicas nacionales.',
+                        '<strong>Lista Tascón en Apure:</strong> La filtración de firmas del revocatorio se empleó para perseguir y despedir a empleados públicos de la gobernación y entes ministeriales locales.',
+                        '<strong>Asfixia de Técnicos Locales:</strong> El boicot presupuestario contra la gobernación de Lippa impidió el pago de salarios homologados y paralizó obras hidráulicas críticas en Apure.'
+                    ]
+                }
+            },
+            {
+                id: '2004-2008',
+                years: '2004 - 2008',
+                title: 'Bonanza y Clientelismo',
+                shortDesc: 'Auge de la renta petrolera nacional y expansión burocrática regional.',
+                source: 'Saber UCAB (Estudios de expropiaciones socialistas y destrucción del empleo ganadero) / Elecciones Regionales CNE (2004) (MVR: 66.85% de votos) y Reelección Presidencial 2006',
+                national: {
+                    name: 'Hugo Chávez Frías',
+                    role: 'Presidente de la República (PSUV)',
+                    context: 'Bonanza de ingresos petroleros históricos. Lanzamiento masivo de las Misiones Sociales (Barrio Adentro, Mercal). Proclamación de la transición al "Socialismo del Siglo XXI" tras su holgada reelección presidencial en 2006.',
+                    avatarText: 'HC',
+                    avatarImg: 'hugo_chavez.webp',
+                    bio: 'Fortalecido financieramente por precios del crudo que rozaron los $100 por barril, Chávez implementó la nacionalización de activos estratégicos y estatizó el control del territorio y los recursos, debilitando la autonomía de los gobiernos descentralizados.'
+                },
+                regional: {
+                    name: 'Jesús Aguilarte Gámez',
+                    role: 'Gobernador de Apure (MVR / PSUV)',
+                    context: 'Recuperó el estado en 2004 con el 66.85% de los sufragios. Su gestión aprovechó los abundantes fondos federales para establecer un esquema clientelar masivo de absorción de mano de obra improductiva.',
+                    avatarText: 'JA',
+                    avatarImg: 'jesus_aguilarte.webp',
+                    bio: 'En su segundo mandato, Aguilarte alió a Apure con las directrices socialistas de Chávez, financiando la estatización de tierras ganaderas y subsidiando la producción vacuna sin criterios reales de rentabilidad técnica.'
+                },
+                impact: {
+                    title: 'Burocratización Inorgánica del Empleo',
+                    points: [
+                        '<strong>Hipertrofia de la Nómina:</strong> La gobernación de Apure expandió masivamente su personal, contratando a miles de ciudadanos bajo criterios estrictos de afiliación revolucionaria.',
+                        '<strong>Subordinación de la Academia:</strong> La formación profesional técnica agropecuaria de la UNELLEZ Apure fue modificada para enfocarse en la ideologización socialista.',
+                        '<strong>Destrucción del Empleo Privado:</strong> La expropiación de fincas ganaderas productivas en el estado destruyó puestos de trabajo privados estables, sustituyéndolos por cooperativas ineficientes.'
+                    ]
+                }
+            },
+            {
+                id: '2008-2011',
+                years: '2008 - 2011',
+                title: 'Colapso de Aguilarte',
+                shortDesc: 'Hipertrofia de nómina de 34 mil empleados y dimisión por corrupción.',
+                source: 'Fiscalía General de la República (23 expedientes de investigación de delitos contra la cosa pública) / Runrunes (2011) "Análisis de la renuncia del gobernador Jesús Aguilarte Gámez" (Duplicación de nómina de 14 mil a 34 mil)',
+                national: {
+                    name: 'Hugo Chávez Frías',
+                    role: 'Presidente de la República (PSUV)',
+                    context: 'Aceleró el proceso de centralización del Estado tras el revés electoral del referéndum constitucional de 2007. Implementó leyes habilitantes para controlar y confiscar bienes de producción y puertos regionales.',
+                    avatarText: 'HC',
+                    avatarImg: 'hugo_chavez.webp',
+                    bio: 'Frente a la caída de ingresos por la crisis financiera global de 2008, Chávez centralizó los presupuestos de salud y vialidad de los estados y exigió a los gobernadores del PSUV disciplina absoluta y erradicación de ineficiencias locales.'
+                },
+                regional: {
+                    name: 'Jesús Aguilarte Gámez',
+                    role: 'Gobernador de Apure (PSUV - Dimisión)',
+                    context: 'Reelecto en 2008 con 56.97%. Su gestión colapsó en febrero de 2011 debido al quiebre de la caja fiscal estatal, derivado de mantener una nómina de más de 34.000 empleados. Dimitió bajo asedio y cargos de corrupción de su propio partido.',
+                    avatarText: 'JA',
+                    avatarImg: 'jesus_aguilarte.webp',
+                    bio: 'La administración de Aguilarte fue catalogada de "verdadero desastre" por el propio Chávez. Con más de 20 investigaciones fiscales abiertas por malversación, se le obligó a renunciar. Fue asesinado en 2012 en un atentado en Maracay vinculado a deudas mafiosas.'
+                },
+                impact: {
+                    title: 'Quiebra Salarial e Impago Generalizado',
+                    points: [
+                        '<strong>Impago de Contratos Colectivos:</strong> La gobernación suspendió el pago de pensiones y bonificaciones a educadores y trabajadores sanitarios llaneros.',
+                        '<strong>Conflictividad Laboral:</strong> Apure vivió ciclos de protestas y paros de empleados públicos que exigían la cancelación de salarios atrasados.',
+                        '<strong>Desprofesionalización de la Gestión:</strong> El colapso ético y administrativo ahuyentó al personal técnico calificado de las direcciones de finanzas de la gobernación.'
+                    ]
+                }
+            },
+            {
+                id: '2011-2012',
+                years: '2011 - 2012',
+                title: 'Intervención de Apure',
+                shortDesc: 'Designación de Carrizales para imponer orden militar y fiscal.',
+                source: 'Gobernación del Estado Apure (2011) "Decreto de designación del Coronel Ramón Carrizalez Rengifo" / Saber ULA / Runrunes "Un problema no tan pequeño: la renuncia de Aguilarte"',
+                national: {
+                    name: 'Hugo Chávez Frías',
+                    role: 'Presidente de la República (PSUV)',
+                    context: 'Último bienio de su presidencia. Designó a altos oficiales militares en gobiernos regionales clave para asegurar el control territorial fronterizo ante la inminencia de su desaparición física.',
+                    avatarText: 'HC',
+                    avatarImg: 'hugo_chavez.webp',
+                    bio: 'Chávez centralizó el control militar de la frontera de Apure con miras a contener incursiones insurgentes y asegurar la lealtad absoluta de la región llanera en la inminente transición política socialista.'
+                },
+                regional: {
+                    name: 'Ramón Alonso Carrizales Rengifo',
+                    role: 'Gobernador de Apure (PSUV - Designado)',
+                    context: 'Exvicepresidente de la República y Coronel de la FANB. Designado gobernador encargado por Chávez tras la dimisión de Aguilarte en 2011. Saneó administrativamente el estado y centralizó la toma de decisiones.',
+                    avatarText: 'RC',
+                    avatarImg: 'ramon_carrizales.webp',
+                    bio: 'Ramón Carrizales impuso disciplina fiscal militar. Recortó el clientelismo informal de la gobernación y asumió un control férreo de los recursos del estado, pacificando la crisis presupuestaria regional con fondos de Caracas.'
+                },
+                impact: {
+                    title: 'Militarización del Empleo Gerencial llanero',
+                    points: [
+                        '<strong>Reemplazo Civil:</strong> Los cargos directivos en la gobernación y corporaciones estatales de Apure fueron asignados a oficiales militares de la FANB en detrimento de profesionales civiles.',
+                        '<strong>Depuración de la Nómina:</strong> Se eliminaron miles de puestos inorgánicos, saneando las cuentas pero aumentando el desempleo local en una economía deprimida.',
+                        '<strong>Control de Actividades:</strong> Las actividades profesionales del sector pecuario quedaron subordinadas a permisos militares de movilización y guías de transporte.'
+                    ]
+                }
+            },
+            {
+                id: '2012-2017',
+                years: '2012 - 2017',
+                title: 'Securitización Militar',
+                shortDesc: 'Legitimación de Carrizales y asedio económico nacional.',
+                source: 'Saber ULA "Gobernabilidad e Instituciones en la Periferia" / Saber UCV / Elecciones Regionales CNE (2012) (PSUV - Ramón Carrizalez: 63.30% de votos)',
+                national: {
+                    name: 'Nicolás Maduro Moros',
+                    role: 'Presidente de la República (PSUV)',
+                    context: 'Asumió en abril de 2013 tras la muerte de Chávez. Enfrentó protestas civiles masivas en 2014 y 2017, y la victoria electoral opositora en el Parlamento de 2015, respondiendo con la inhabilitación del legislativo y represión judicial.',
+                    avatarText: 'NM',
+                    avatarImg: 'nicolas_maduro.webp',
+                    bio: 'Maduro comenzó el viraje hacia un modelo autoritario de control estricto, empleando fallos del Tribunal Supremo de Justicia (TSJ) y decretos presidenciales de excepción para obviar controles constitucionales de gasto público y de derechos humanos.'
+                },
+                regional: {
+                    name: 'Ramón Alonso Carrizales Rengifo',
+                    role: 'Gobernador de Apure (PSUV - Electo)',
+                    context: 'Electo con el 63.30% de los votos en 2012. Estructuró un sistema de control social y de securitización fronteriza. Estableció alianzas de convivencia táctica de facto con el ELN para regular el orden interno de la frontera llanera.',
+                    avatarText: 'RC',
+                    avatarImg: 'ramon_carrizales.webp',
+                    bio: 'La era Carrizales consolidó un orden de control militar e institucional férreo. Logró pacificar Apure de las protestas del centro del país, pero a costa del debilitamiento de los poderes civiles y de la contraloría pública local.'
+                },
+                impact: {
+                    title: 'Inicio del Éxodo de Capital Humano Calificado',
+                    points: [
+                        '<strong>Deterioro Salarial por Inflación:</strong> El salario real en el estado Apure experimentó una severa depreciación, destruyendo el incentivo del trabajo formal.',
+                        '<strong>Fuga de Cerebros Fronteriza:</strong> Médicos y docentes de Apure comenzaron a migrar en masa hacia el departamento de Arauca (Colombia) en busca de salarios dignos.',
+                        '<strong>Restricciones a Profesionales:</strong> La militarización de las alcabalas y puertos fluviales limitó el libre ejercicio de los ingenieros agrónomos y productores locales.'
+                    ]
+                }
+            },
+            {
+                id: '2017-2021',
+                years: '2017 - 2021',
+                title: 'Crisis Humanitaria',
+                shortDesc: 'Hiperinflación, dolarización de facto y parálisis del sector público.',
+                source: 'Provea (Informe Anual 2021: "Derechos Humanos y Precarización del Empleo") / Saber UCAB (Éxodo de profesionales y médicos en centros de salud de Apure) / Elecciones CNE (2017) (PSUV: 52.13% de votos)',
+                national: {
+                    name: 'Nicolás Maduro Moros',
+                    role: 'Presidente de la República (PSUV)',
+                    context: 'Reelecto en 2018 bajo severos cuestionamientos y sanciones internacionales. Instaló la Asamblea Nacional Constituyente en 2017. Enfrentó una crisis económica de proporciones históricas, con hiperinflación y parálisis productiva.',
+                    avatarText: 'NM',
+                    avatarImg: 'nicolas_maduro.webp',
+                    bio: 'Maduro consolidó un modelo de supervivencia estatal basado en el control social férreo (Carnet de la Patria, bolsas CLAP) y la dolarización transaccional desordenada de facto de los comercios nacionales.'
+                },
+                regional: {
+                    name: 'Ramón Alonso Carrizales Rengifo',
+                    role: 'Gobernador de Apure (PSUV - Reelecto)',
+                    context: 'Reelecto en 2017 con 52.13%. Su mandato coincidió con el colapso absoluto de los servicios públicos esenciales en Apure (electricidad, gas, gasolina) y el auge del contrabando fronterizo de extracción hacia Colombia.',
+                    avatarText: 'RC',
+                    avatarImg: 'ramon_carrizales.webp',
+                    bio: 'Carrizales enfrentó el desgaste total de la gestión gubernamental regional. Dependía operativamente del control de aduanas fluviales y del apoyo del ELN para mantener la paz mafiosa en el territorio llanero.'
+                },
+                impact: {
+                    title: 'La Era del Salario Cero y el Pluriempleo',
+                    points: [
+                        '<strong>Pulverización Salarial:</strong> El sueldo mínimo del sector público equivalía a menos de 2 dólares mensuales, forzando la deserción laboral generalizada.',
+                        '<strong>Desprofesionalización Total:</strong> La falta de repuestos, internet y luz forzó al talento calificado a la subsistencia en el comercio informal de frontera.',
+                        '<strong>Obsolescencia Técnica:</strong> Parálisis de la investigación ganadera e hidráulica local en Apure por falta absoluta de presupuestos de inversión estatal.'
+                    ]
+                }
+            },
+            {
+                id: '2021',
+                years: '2021',
+                title: 'Conflicto de Apure',
+                shortDesc: 'Combates militares en La Victoria e imposición central de Piñate.',
+                source: 'Wikipedia "Enfrentamientos en Apure de 2021 (FARC-EP vs FANB)" / Provea y Fundaredes (2021) "Informe: Masacre de El Ripial del 25 de marzo de 2021"',
+                national: {
+                    name: 'Nicolás Maduro Moros',
+                    role: 'Presidente de la República (PSUV)',
+                    context: 'Condujo la respuesta militar del Estado en el conflicto armado de Apure empleando asesoría tecnológica de guerra electrónica rusa para neutralizar las capacidades del Frente Décimo de las disidencias de las FARC.',
+                    avatarText: 'NM',
+                    avatarImg: 'nicolas_maduro.webp',
+                    bio: 'Maduro centralizó la respuesta bélica y promovió la posterior renovación de gobernadores locales en las elecciones de 2021, desplazando a liderazgos militares desgastados por figuras políticas de estricta lealtad ideológica.'
+                },
+                regional: {
+                    name: 'Ramón Carrizales / Eduardo Piñate',
+                    role: 'Gobernabilidad en Transición Bélica',
+                    context: 'Conflicto armado directo en La Victoria y El Ripial contra las disidencias FARC. Las violaciones de DD.HH. de las FAES (Masacre de El Ripial) forzaron la salida de Carrizales. En las primarias del PSUV ganó el líder local Pedro Leal (51.71%), pero Caracas impuso a Eduardo Piñate.',
+                    avatarText: 'EP',
+                    avatarImg: 'eduardo_pinate.webp',
+                    bio: 'Ramón Carrizales dejó el cargo desgastado por la guerra fronteriza y acusaciones de excesos militares de las FAES. Eduardo Piñate (PSUV) fue designado candidato desde Caracas e impuesto en los comicios regionales de 2021 con el 44.17% de los votos.'
+                },
+                impact: {
+                    title: 'Desplazamiento Forzado y Parálisis Productiva',
+                    points: [
+                        '<strong>Desplazamiento de Civiles:</strong> Más de 5.000 campesinos y profesionales de La Victoria huyeron hacia Arauca por bombardeos aéreos de la Fuerza Aérea (K-8).',
+                        '<strong>Parálisis Pecuaria:</strong> El minado de campos de cultivo y fincas ganaderas impidió el trabajo de veterinarios e ingenieros agrónomos en el municipio Páez.',
+                        '<strong>Pérdida de Personal Crítico:</strong> Deserción total de médicos y maestros rurales en distritos fronterizos por la inseguridad y combates armados.'
+                    ]
+                }
+            },
+            {
+                id: '2021-2024',
+                years: '2021 - 2024',
+                title: 'Modelo Ideológico',
+                shortDesc: 'Aplicación del Memorando 2792 y asfixia de la contratación colectiva.',
+                source: 'Ministerio del Trabajo (Memorando 2792 del 11 de octubre de 2018) / Demanda de Nulidad de Provea (Liquidación de contratos colectivos y aplanamiento de escalas salariales)',
+                national: {
+                    name: 'Nicolás Maduro Moros',
+                    role: 'Presidente de la República (PSUV)',
+                    context: 'Consolidó la estabilización económica interna mediante la devaluación controlada y la contención estricta del gasto público social, limitando los incrementos de sueldos para el sector de educación y salud.',
+                    avatarText: 'NM',
+                    avatarImg: 'nicolas_maduro.webp',
+                    bio: 'Maduro priorizó el control de la inflación conteniendo el salario de los trabajadores de la administración pública nacional y reestructurando las empresas del Estado bajo alianzas productivas pragmáticas.'
+                },
+                regional: {
+                    name: 'Eduardo Piñate',
+                    role: 'Gobernador de Apure (PSUV - Resignación)',
+                    context: 'Impuesto por Caracas. Ejerció una gestión de corte rígidamente ideológico. Siendo el autor intelectual del Memorando 2792 de 2018 (que liquidó los contratos colectivos en el país), enfrentó un persistente rechazo sindical de gremios públicos llaneros.',
+                    avatarText: 'EP',
+                    avatarImg: 'eduardo_pinate.webp',
+                    bio: 'Eduardo Piñate gobernó con fuerte centralismo doctrinario. En septiembre de 2024 renunció para retornar al Ministerio del Trabajo en Caracas, buscando contener el descontento laboral nacional de cara a los comicios presidenciales.'
+                },
+                impact: {
+                    title: 'Liquidación de Derechos y Éxodo Docente',
+                    points: [
+                        '<strong>Aplicación del Memorando 2792:</strong> Reducción de los salarios de docentes de Apure a su expresión mínima y eliminación de seguros y primas profesionales.',
+                        '<strong>Deserción en Hospitales:</strong> El personal de enfermería y medicina del Hospital de San Fernando renunció de forma masiva ante condiciones deplorables.',
+                        '<strong>Parálisis de la Innovación Ganadera:</strong> Las corporaciones ganaderas estatales funcionaron bajo control político y sin personal técnico de investigación calificado.'
+                    ]
+                }
+            },
+            {
+                id: '2024-2025',
+                years: '2024 - 2025',
+                title: 'Giro Técnico',
+                shortDesc: 'Ascenso de Wilmer Rodríguez y retorno al pragmatismo productivo.',
+                source: 'Gaceta Oficial del Estado Apure (Septiembre 2024: Nombramiento de Wilmer Rodríguez Véliz) / Corpogaba y Empresa Socialista Agroflora / Saber UCAB (Estudios de pragmatismo y reactivación ganadera)',
+                national: {
+                    name: 'Nicolás Maduro Moros',
+                    role: 'Presidente de la República (PSUV)',
+                    context: 'Promovió una transición táctica en Apure en septiembre de 2024 para aplacar la tensión con el gremio de productores ganaderos llaneros privados y reactivar el suministro de carne al centro del país.',
+                    avatarText: 'NM',
+                    avatarImg: 'nicolas_maduro.webp',
+                    bio: 'El gobierno de Maduro flexibilizó los discursos de confrontación agraria en el interior llanero, priorizando alianzas de cohabitación comercial con sectores privados productivos locales.'
+                },
+                regional: {
+                    name: 'Wilmer Arcángel Rodríguez Véliz',
+                    role: 'Gobernador Encargado de Apure (PSUV)',
+                    context: 'Ingeniero ganadero nacido en Mantecal. Ex-presidente de la Empresa Socialista Agroflora y de la Corporación Ganadera Bravos de Apure (Corpogaba). Asumió el cargo tras el retiro de Piñate en septiembre de 2024.',
+                    avatarText: 'WR',
+                    avatarImg: 'wilmer_rodriguez.webp',
+                    bio: 'Wilmer Rodríguez representó un cambio de perfil radical frente a sus predecesores militares e ideólogos. Con trayectoria técnica en gerencia pecuaria, enfocó su gestión en alianzas con la Asociación de Ganaderos de Apure.'
+                },
+                impact: {
+                    title: 'Reactivación de Alianzas y Capacitación Agraria',
+                    points: [
+                        '<strong>Incentivos Productivos:</strong> Se implementaron bonos e incentivos económicos en divisas para técnicos de Agroflora y Corpogaba para frenar la deserción.',
+                        '<strong>Convenios de Formación:</strong> Convenios con gremios ganaderos privados para la capacitación del talento humano joven en inseminación y sanidad animal.',
+                        '<strong>Estabilización del Empleo Técnico:</strong> Recuperación parcial de puestos de trabajo técnicos en el sector pecuario privado llanero.'
+                    ]
+                }
+            },
+            {
+                id: '2025-2026',
+                years: '2025 - 2026',
+                title: 'Tragedia y Desidia',
+                shortDesc: 'Inundaciones catastróficas, desvío de fondos y extorsión ganadera.',
+                source: 'Correo del Caroní (Julio 2025) "Apure está inundado por los cuatro costados" / Sebastiana Sin Secretos "Extorsión y despojo en Hato El Chaparralito" / YouTube Alexander Medina (Inundaciones de Apure)',
+                national: {
+                    name: 'Nicolás Maduro Moros',
+                    role: 'Presidente de la República (PSUV)',
+                    context: 'Su gobierno nacional entra en crisis total y centralización defensiva, desentendiéndose de la emergencia hidráulica de la periferia llanera y tolerando monopolios de comercialización.',
+                    avatarText: 'NM',
+                    avatarImg: 'nicolas_maduro.webp',
+                    bio: 'En la fase final de su administración, Nicolás Maduro priorizó la securitización interna, delegando las emergencias hidráulicas del estado Apure al gobierno regional sin dotación de fondos nacionales.'
+                },
+                regional: {
+                    name: 'Wilmer Arcángel Rodríguez Véliz',
+                    role: 'Gobernador Electo de Apure (PSUV)',
+                    context: 'Asume en junio de 2025 con el 96.40% de votos. Enfrentó las graves inundaciones de 2025 (53.000 damnificados) y fue denunciado por desviar presupuestos de diques a tómbolas y templetes festivos, además de extorsiones agrícolas.',
+                    avatarText: 'WR',
+                    avatarImg: 'wilmer_rodriguez.webp',
+                    bio: 'Wilmer Rodríguez gobernó en Apure bajo el plan "Pasión por Apure". Su administración fue catalogada como una fachada que encubre el despojo ganadero (caso Hato El Chaparralito) y la desidia en dragados preventivos del Sarare.'
+                },
+                impact: {
+                    title: 'Monopolio Festivo y Extorsión Judicial',
+                    points: [
+                        '<strong>Desvío de Recursos Hidráulicos:</strong> Mientras los diques colapsaban y ocurrían cortes eléctricos de 24 horas, la gobernación gastaba en parrandas y ferias ganaderas.',
+                        '<strong>Despojo del Chaparralito:</strong> Jueces vinculados a la gobernación extorsionan a productores agrícolas, robando y remarcando reses con el hierro estatal.',
+                        '<strong>Marginación Técnica:</strong> Los ingenieros forestales e hidráulicos son completamente marginados de los presupuestos, atendiendo emergencias fluviales con las uñas.'
+                    ]
+                }
+            },
+            {
+                id: '2026',
+                years: '2026',
+                title: 'Era Sucesoria',
+                shortDesc: 'Sucesión interina de Delcy Rodríguez y conmoción exterior.',
+                source: 'Gaceta Oficial Extraordinaria N° 6.954 (Decreto N° 5.200 de Conmoción Exterior del 3 de enero de 2026) / Associated Press (AP News) "Sucesión de Delcy Rodríguez y purga del gabinete madurista"',
+                national: {
+                    name: 'Delcy Rodríguez Gómez',
+                    role: 'Presidenta Encargada de la República (PSUV)',
+                    context: 'Asume la presidencia interina tras la captura de Maduro por EE. UU. el 3 de enero de 2026. Decreta el Estado de Conmoción Exterior (Decreto N° 5.200), militariza servicios y purga el gabinete de figuras maduristas, abriendo el crudo a capitales privados.',
+                    avatarText: 'DR',
+                    avatarImg: 'delcy_rodriguez.webp',
+                    bio: 'Delcy Rodríguez Gómez (1969), abogada y exvicepresidenta, asumió el poder nacional en medio de una conmoción política inédita. Impuso un viraje de apertura económica pragmática tutelada por la administración estadounidense, desatando fracturas internas en las bases del chavismo.'
+                },
+                regional: {
+                    name: 'Wilmer Arcángel Rodríguez Véliz',
+                    role: 'Gobernador de Apure (PSUV)',
+                    context: 'Enfrenta la militarización del estado Apure bajo las directrices del Decreto N° 5.200 de Delcy Rodríguez, controlando con rigor los reclamos gremiales en la frontera.',
+                    avatarText: 'WR',
+                    avatarImg: 'wilmer_rodriguez.webp',
+                    bio: 'Wilmer Rodríguez asume la ejecución de los decretos extraordinarios de control territorial en Apure, coordinando la asfixia gremial en las zonas ganaderas bajo directrices de conmoción nacional.'
+                },
+                impact: {
+                    title: 'Militarización Laboral y Control Social',
+                    points: [
+                        '<strong>Sometimiento Gremial:</strong> Bajo el Decreto de Conmoción, los empleados públicos de servicios básicos de Apure quedan adscritos a la jurisdicción militar, prohibiéndose la protesta.',
+                        '<strong>Apertura Comercial Controlada:</strong> La flexibilización petrolera del centro del país se refleja en Apure en un flujo comercial especulativo y dolarizado en la frontera.',
+                        '<strong>Precarización Persistente:</strong> Aunque hay cohabitación con capitales privados, se mantiene el aplanamiento salarial y el éxodo sistemático de especialistas de salud.'
+                    ]
+                }
+            }
+        ];
+
+        let currentEraId = '1989-1992';
+        let currentTab = 'power';
+        let chartMode = 'focused'; // 'focused' o 'full'
+        let chartInstance = null;
+        let briefingStarted = false;
+
+        // Helper para renderizar avatares sin stacking issues adaptado a marcos (object-cover w-full h-full)
+        function getLeaderAvatar(leader, bgClass = 'bg-[#004c7d]') {
+            if (leader.avatarImg && leader.avatarImg.trim() !== '') {
+                return `<img src="${leader.avatarImg}" alt="${leader.name}" class="w-full h-full object-cover" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        <div class="w-full h-full flex items-center justify-center ${bgClass} text-white font-bold text-xs" style="display: none;">${leader.avatarText}</div>`;
+            } else {
+                return `<div class="w-full h-full flex items-center justify-center ${bgClass} text-white font-bold text-xs">${leader.avatarText}</div>`;
+            }
+        }
+
+        // Renderizado del timeline vertical con foto de presidentes como nodo con forma de hoja y progreso acumulado
+        function renderTimeline() {
+            const container = document.getElementById('timeline-ui');
+            container.innerHTML = '';
+
+            const activeIndex = briefingStarted ? timelineData.findIndex(e => e.id === currentEraId) : -1;
+
+            timelineData.forEach((era, idx) => {
+                const isLast = idx === timelineData.length - 1;
+                const isCurrentActive = idx === activeIndex;
+                const isPast = idx < activeIndex;
+                const isPastOrActive = idx <= activeIndex;
+
+                const node = document.createElement('div');
+                
+                // Si la línea de tiempo ha comenzado, atenuamos los nodos futuros
+                let opacityClass = "";
+                if (briefingStarted) {
+                    opacityClass = isPastOrActive ? "opacity-100" : "opacity-50 hover:opacity-85 transition-opacity";
+                }
+                
+                node.className = `timeline-node flex gap-4 relative group ${era.id === currentEraId && briefingStarted ? 'active' : ''} ${opacityClass}`;
+                node.id = `node-${era.id}`;
+
+                const isLight = document.body.classList.contains('light-theme');
+                
+                // Estilo del dot según progreso
+                let dotClasses = "timeline-dot w-10 h-10 border-2 bg-[#222226] z-10 overflow-hidden transition-all duration-200 flex-shrink-0";
+                if (isCurrentActive) {
+                    if (isLight) {
+                        dotClasses += " border-[#004c7d] shadow-[0_0_6px_rgba(0,76,125,0.3)] scale-[1.15]";
+                    } else {
+                        dotClasses += " border-[#799eb0] shadow-[0_0_12px_rgba(121,158,176,0.6)] scale-[1.15]";
+                    }
+                } else if (isPast) {
+                    if (isLight) {
+                        dotClasses += " border-[#004c7d]/80 shadow-[0_0_4px_rgba(0,76,125,0.15)]";
+                    } else {
+                        dotClasses += " border-[#799eb0]/80 shadow-[0_0_8px_rgba(121,158,176,0.3)]";
+                    }
+                } else {
+                    dotClasses += isLight ? " border-[#004c7d]/20" : " border-[#3d7596]/30";
+                }
+
+                // Estilo de la sublínea conectora según progreso
+                let sublineClasses = "timeline-subline flex-1 w-0.5 my-1 z-0 transition-colors duration-300";
+                if (isPast) {
+                    sublineClasses += isLight ? " bg-[#004c7d]" : " bg-[#799eb0]";
+                } else {
+                    sublineClasses += isLight ? " bg-[#004c7d]/20" : " bg-[#3d7596]/20";
+                }
+
+                node.innerHTML = `
+                    <!-- Columna Izquierda: Foto del presidente como punto hoja con conector flexible -->
+                    <div class="flex flex-col items-center flex-shrink-0" style="width: 44px;">
+                        <div class="${dotClasses}">
+                            ${getLeaderAvatar(era.national, 'bg-[#004c7d]')}
+                        </div>
+                        ${!isLast ? `<div class="${sublineClasses}"></div>` : ''}
+                    </div>
+                    <!-- Columna Derecha: Contenido de Texto -->
+                    <div class="pb-6 flex-1">
+                        <span class="text-xs font-bold text-xxiii-blue-lighter group-hover:text-xxiii-blue-lighter transition-colors">${era.years}</span>
+                        <h4 class="text-xs font-extrabold uppercase text-[#f5f5f7] tracking-tight leading-tight mt-0.5">${era.title}</h4>
+                        <p class="text-[10px] text-[#b5b5be] leading-tight mt-0.5">${era.shortDesc}</p>
+                    </div>
+                `;
+                node.addEventListener('click', () => {
+                    selectEra(era.id);
+                });
+                container.appendChild(node);
+            });
+        }
+
+        // Trazado dinámico de la ramificación SVG (removido)
+        function drawBranch(animate = false) {
+            // Removido por requerimiento del usuario
+        }
+
+        // Abrir detalles HUD y desplazar timeline a la izquierda
+        function openHUD() {
+            const timelineSec = document.getElementById('timeline-section');
+            const detailsSec = document.getElementById('details-section');
+            
+            timelineSec.classList.remove('lg:w-full', 'max-w-xl', 'mx-auto');
+            timelineSec.classList.add('lg:w-1/3', 'max-w-none', 'mx-0');
+            
+            detailsSec.classList.remove('hidden', 'lg:w-0', 'lg:hidden', 'opacity-0');
+            detailsSec.classList.add('lg:w-2/3', 'opacity-100');
+            
+            // GSAP para animar la entrada del details-section
+            gsap.fromTo('#details-section', { x: 30, opacity: 0 }, { x: 0, opacity: 1, duration: 0.5, ease: 'power2.out' });
+        }
+
+        // Cerrar detalles HUD y regresar timeline al centro de pantalla
+        function closeHUD() {
+            briefingStarted = false;
+            
+            const timelineSec = document.getElementById('timeline-section');
+            const detailsSec = document.getElementById('details-section');
+            
+            gsap.to('#details-section', { x: 30, opacity: 0, duration: 0.4, ease: 'power2.in', onComplete: () => {
+                detailsSec.classList.add('hidden', 'lg:w-0', 'lg:hidden', 'opacity-0');
+                detailsSec.classList.remove('lg:w-2/3', 'opacity-100');
+                
+                timelineSec.classList.remove('lg:w-1/3', 'max-w-none', 'mx-0');
+                timelineSec.classList.add('lg:w-full', 'max-w-xl', 'mx-auto');
+                
+                // Quitar clase activa
+                document.querySelectorAll('.timeline-node').forEach(node => {
+                    node.classList.remove('active');
+                });
+                
+                renderTimeline();
+                setTimeout(() => {
+                    // Hacer un scroll centrado suave al primer elemento al cerrar
+                    document.getElementById('timeline-ui').scrollTo({ top: 0, behavior: 'smooth' });
+                }, 100);
+            }});
+        }
+
+        function selectEra(id) {
+            let animateBranch = false;
+            
+            if (!briefingStarted) {
+                briefingStarted = true;
+                animateBranch = true;
+                openHUD();
+            } else {
+                if (currentEraId !== id) {
+                    animateBranch = true;
+                }
+            }
+            
+            currentEraId = id;
+            document.querySelectorAll('.timeline-node').forEach(node => {
+                node.classList.remove('active');
+            });
+            document.getElementById(`node-${id}`).classList.add('active');
+            
+            // Animación suave de entrada de datos con GSAP
+            gsap.fromTo('#content-panel', { opacity: 0, y: 15 }, { opacity: 1, y: 0, duration: 0.3, ease: 'power2.out', onComplete: () => drawBranch(false) });
+            
+            renderContent();
+            renderTimeline(); // Re-renderizar para aplicar borde de hoja glowing activo
+            
+            // Dibujar el branch después de que empiece la transición
+            setTimeout(() => drawBranch(animateBranch), 50);
+            setTimeout(() => drawBranch(false), 500);
+        }
+
+        function prevEra() {
+            const currentIndex = timelineData.findIndex(e => e.id === currentEraId);
+            if (currentIndex > 0) {
+                selectEra(timelineData[currentIndex - 1].id);
+                // Hacer scroll del elemento para centrarlo
+                const activeNode = document.getElementById(`node-${timelineData[currentIndex - 1].id}`);
+                if (activeNode) {
+                    activeNode.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }
+        }
+
+        function nextEra() {
+            const currentIndex = timelineData.findIndex(e => e.id === currentEraId);
+            if (currentIndex < timelineData.length - 1) {
+                selectEra(timelineData[currentIndex + 1].id);
+                // Hacer scroll del elemento para centrarlo
+                const activeNode = document.getElementById(`node-${timelineData[currentIndex + 1].id}`);
+                if (activeNode) {
+                    activeNode.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }
+        }
+
+        // Generador de Controles de Navegación inferior
+        function getNavigationControlsHTML() {
+            const currentIndex = timelineData.findIndex(e => e.id === currentEraId);
+            const prevDisabled = currentIndex === 0 ? 'opacity-30 pointer-events-none' : '';
+            const nextDisabled = currentIndex === timelineData.length - 1 ? 'opacity-30 pointer-events-none' : '';
+            
+            return `
+                <!-- Controles de Navegación del HUD -->
+                <div class="flex items-center justify-between border-t border-[#3d7596]/20 pt-4 mt-6">
+                    <button onclick="prevEra()" class="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider bg-[#152834]/30 border border-[#3d7596]/30 text-[#799eb0] rounded-[4px_0_4px_0] hover:bg-[#3d7596]/30 transition-all flex items-center gap-1 ${prevDisabled}">
+                        <i data-lucide="chevron-left" class="w-3.5 h-3.5"></i> Anterior
+                    </button>
+                    <span class="text-[10px] font-mono text-[#b5b5be]">Hito ${currentIndex + 1} / ${timelineData.length}</span>
+                    <button onclick="nextEra()" class="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider bg-[#004c7d] border border-[#3d7596]/30 text-white rounded-[4px_0_4px_0] hover:bg-[#3d7596] transition-all flex items-center gap-1 ${nextDisabled}">
+                        Siguiente <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+                    </button>
+                </div>
+            `;
+        }
+
+        function switchTab(tabName) {
+            currentTab = tabName;
+            document.querySelectorAll('#tab-bar button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.getElementById(`tab-${tabName}`).classList.add('active');
+            
+            // Animación suave al cambiar de pestaña
+            gsap.fromTo('#content-panel', { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.25, ease: 'power2.out', onComplete: () => drawBranch(false) });
+            
+            renderContent();
+            setTimeout(() => drawBranch(false), 50);
+        }
+
+        function switchChartMode(mode) {
+            chartMode = mode;
+            document.querySelectorAll('.chart-mode-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.getElementById(`btn-chart-${mode}`).classList.add('active');
+            updateChart();
+        }
+
+        function renderContent() {
+            const era = timelineData.find(e => e.id === currentEraId);
+            const panel = document.getElementById('content-panel');
+            panel.innerHTML = '';
+
+            if (currentTab === 'power') {
+                panel.innerHTML = `
+                    <div class="flex-1 flex flex-col justify-start gap-6">
+                        <!-- Cabecera del Panel -->
+                        <div class="border-b border-[#3d7596]/20 pb-4 flex justify-between items-center">
+                            <div>
+                                <span class="text-xs font-bold uppercase tracking-widest text-[#799eb0]">${era.years}</span>
+                                <h2 class="text-xl font-extrabold uppercase text-[#f5f5f7] tracking-tight mt-1">${era.title}</h2>
+                            </div>
+                            <button onclick="closeHUD()" class="text-[#b5b5be] hover:text-[#799eb0] transition-colors p-1" title="Cerrar detalles">
+                                <i data-lucide="x" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+
+                        <!-- Comparación de Poder en Estilo Libre -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- Poder Nacional -->
+                            <div class="p-5 flex flex-col justify-between min-h-[220px] bg-[#152834]/15 border-l-2 border-[#3d7596] rounded-[0_6px_6px_0]">
+                                <div>
+                                    <div class="flex items-center justify-between mb-3 text-xxiii-gray-text">
+                                        <h3 class="text-xs font-extrabold uppercase tracking-wider text-[#799eb0]">Poder Nacional</h3>
+                                        <i data-lucide="globe" class="w-4 h-4 text-[#799eb0]"></i>
+                                    </div>
+                                    <div class="flex items-start gap-3 mb-4">
+                                        <div class="w-14 h-14 rounded-[4px_0_4px_0] overflow-hidden border border-[#3d7596]/30 bg-[#1c1c1c] flex-shrink-0 cursor-pointer" onclick="openBioModal('national')">
+                                            ${getLeaderAvatar(era.national, 'bg-[#004c7d]')}
+                                        </div>
+                                        <div>
+                                            <h4 class="font-extrabold text-[#f5f5f7] uppercase text-sm leading-tight hover:text-[#799eb0] cursor-pointer" onclick="openBioModal('national')">${era.national.name}</h4>
+                                            <span class="text-[9px] text-[#b5b5be] uppercase font-bold leading-tight block mt-0.5">${era.national.role}</span>
+                                        </div>
+                                    </div>
+                                    <p class="text-xs text-[#b5b5be] leading-relaxed">${era.national.context}</p>
+                                </div>
+                                <button onclick="openBioModal('national')" class="text-left text-[9px] text-[#799eb0] font-bold uppercase tracking-widest mt-4 block hover:text-[#b5c7c9] transition-colors">Ver ficha biográfica &rarr;</button>
+                            </div>
+
+                            <!-- Poder Regional -->
+                            <div class="p-5 flex flex-col justify-between min-h-[220px] bg-[#152834]/15 border-l-2 border-[#3d7596] rounded-[0_6px_6px_0]">
+                                <div>
+                                    <div class="flex items-center justify-between mb-3 text-xxiii-gray-text">
+                                        <h3 class="text-xs font-extrabold uppercase tracking-wider text-[#799eb0]">Gobernación de Apure</h3>
+                                        <i data-lucide="map-pin" class="w-4 h-4 text-[#799eb0]"></i>
+                                    </div>
+                                    <div class="flex items-start gap-3 mb-4">
+                                        <div class="w-14 h-14 rounded-[4px_0_4px_0] overflow-hidden border border-[#3d7596]/30 bg-[#1c1c1c] flex-shrink-0 cursor-pointer" onclick="openBioModal('regional')">
+                                            ${getLeaderAvatar(era.regional, 'bg-[#0e344d]')}
+                                        </div>
+                                        <div>
+                                            <h4 class="font-extrabold text-[#f5f5f7] uppercase text-sm leading-tight hover:text-[#799eb0] cursor-pointer" onclick="openBioModal('regional')">${era.regional.name}</h4>
+                                            <span class="text-[9px] text-[#b5b5be] uppercase font-bold leading-tight block mt-0.5">${era.regional.role}</span>
+                                        </div>
+                                    </div>
+                                    <p class="text-xs text-[#b5b5be] leading-relaxed">${era.regional.context}</p>
+                                </div>
+                                <button onclick="openBioModal('regional')" class="text-left text-[9px] text-[#799eb0] font-bold uppercase tracking-widest mt-4 block hover:text-[#b5c7c9] transition-colors">Ver ficha biográfica &rarr;</button>
+                            </div>
+                        </div>
+                        
+                        <!-- Fuente Específica Footnote -->
+                        <div class="pt-3 border-t border-[#3d7596]/15 text-[9px] text-[#b5b5be] italic mt-auto">
+                            <span class="font-bold text-[#799eb0] uppercase font-mono not-italic">// Fuente:</span> ${era.source}
+                        </div>
+                    </div>
+                    ${getNavigationControlsHTML()}
+                `;
+            } else if (currentTab === 'talent') {
+                panel.innerHTML = `
+                    <div class="flex-1 flex flex-col justify-start gap-6">
+                        <div>
+                            <div class="border-b border-[#3d7596]/20 pb-4 mb-6 flex items-center justify-between">
+                                <div>
+                                    <span class="text-xs font-bold uppercase tracking-widest text-[#799eb0]">Análisis de Talento Humano</span>
+                                    <h2 class="text-lg font-extrabold uppercase text-[#f5f5f7] tracking-tight mt-1">${era.impact.title}</h2>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <i data-lucide="users" class="text-[#799eb0] w-5 h-5"></i>
+                                    <button onclick="closeHUD()" class="text-[#b5b5be] hover:text-[#799eb0] transition-colors p-1" title="Cerrar detalles">
+                                        <i data-lucide="x" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <ul class="space-y-4">
+                                ${era.impact.points.map(pt => `
+                                    <li class="flex items-start gap-2.5">
+                                        <span class="text-[#799eb0] mt-1 font-bold text-sm">&#9656;</span>
+                                        <p class="text-xs text-[#b5b5be] leading-relaxed">${pt}</p>
+                                    </li>
+                                `).join('')}
+                            </ul>
+                        </div>
+                        <div class="p-4 rounded-[0_6px_6px_0] bg-[#152834]/15 border-l-2 border-[#3d7596] text-[10px] text-[#b5b5be] leading-relaxed mt-auto">
+                            <strong>Impacto en Maestría (Comprensión de la Realidad):</strong> Refleja cómo la inestabilidad en las cúpulas del poder del estado fronterizo (ej: purga tras el revocatorio o imposición desde Caracas de líderes) deteriora directamente el tejido laboral y productivo llanero, forzando la fuga del talento calificado.
+                        </div>
+                        
+                        <!-- Fuente Específica Footnote -->
+                        <div class="pt-3 border-t border-[#3d7596]/15 text-[9px] text-[#b5b5be] italic">
+                            <span class="font-bold text-[#799eb0] uppercase font-mono not-italic">// Fuente:</span> ${era.source}
+                        </div>
+                    </div>
+                    ${getNavigationControlsHTML()}
+                `;
+            } else if (currentTab === 'chart') {
+                panel.innerHTML = `
+                    <div class="flex-1 flex flex-col justify-start gap-6">
+                        <div>
+                            <div class="border-b border-[#3d7596]/20 pb-3 flex justify-between items-center">
+                                <div>
+                                    <h3 class="text-base font-extrabold uppercase text-[#f5f5f7] tracking-wide">Modelado de Tendencias</h3>
+                                    <p class="text-[9px] text-[#b5b5be]">Debilidad Institucional vs. Oportunidades del Talento.</p>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <!-- Selector Generativo del Gráfico -->
+                                    <div class="flex gap-1.5 text-[9px] bg-[#152834]/20 p-1 border border-[#3d7596]/20 rounded-[4px_0_4px_0]">
+                                        <button id="btn-chart-focused" onclick="switchChartMode('focused')" class="chart-mode-btn xxiii-btn ${chartMode === 'focused' ? 'active' : ''} px-2.5 py-1 uppercase font-bold tracking-widest text-[9px]">Focalizada</button>
+                                        <button id="btn-chart-full" onclick="switchChartMode('full')" class="chart-mode-btn xxiii-btn ${chartMode === 'full' ? 'active' : ''} px-2.5 py-1 uppercase font-bold tracking-widest text-[9px]">Completa</button>
+                                    </div>
+                                    <button onclick="closeHUD()" class="text-[#b5b5be] hover:text-[#799eb0] transition-colors p-1" title="Cerrar detalles">
+                                        <i data-lucide="x" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <!-- Canvas del Gráfico -->
+                            <div class="relative w-full h-[220px] mt-4">
+                                <canvas id="politicalChart"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Fuente Específica por Click -->
+                        <div class="p-4 rounded-[0_6px_6px_0] bg-[#152834]/15 border-l-2 border-[#799eb0] text-[9.5px] text-[#f5f5f7] leading-relaxed">
+                            <span class="font-bold text-[#b5c7c9] block mb-1 uppercase">// FUENTE ACADÉMICA DEL PERÍODO (${era.years})</span>
+                            ${era.source}
+                        </div>
+                    </div>
+                    ${getNavigationControlsHTML()}
+                `;
+                // Inicializar y renderizar el gráfico
+                setTimeout(initEraChart, 50);
+            } else if (currentTab === 'slide') {
+                panel.innerHTML = `
+                    <div class="flex-1 flex flex-col justify-start gap-4">
+                        <div class="border-b border-[#3d7596]/20 pb-3 flex justify-between items-center">
+                            <div>
+                                <h3 class="text-base font-extrabold uppercase text-[#f5f5f7] tracking-wide">Generador de Diapositivas</h3>
+                                <p class="text-[9px] text-[#b5b5be]">Exporta este hito como una lámina de presentación (16:9) de alta calidad.</p>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <button onclick="exportCurrentSlide()" class="px-4 py-2 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 bg-[#004c7d] text-white rounded-[4px_0_4px_0] hover:bg-[#3d7596] transition-colors">
+                                    <i data-lucide="download" class="w-3.5 h-3.5"></i> Exportar JPG
+                                </button>
+                                <button onclick="closeHUD()" class="text-[#b5b5be] hover:text-[#799eb0] transition-colors p-1" title="Cerrar detalles">
+                                    <i data-lucide="x" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Contenedor del Slide (Previsualización y Captura) -->
+                        <div class="border border-[#3d7596]/30 rounded-[12px_0_12px_0] overflow-hidden bg-[#1c1c1c] p-1">
+                            <div id="slide-capture-area" class="w-full aspect-[16/9] bg-[#1c1c1c] text-[#f5f5f7] p-8 flex flex-col justify-between relative overflow-hidden" style="max-width: 100%; box-sizing: border-box;">
+                                
+                                <!-- Cabecera de la Diapositiva -->
+                                <div class="flex justify-between items-start border-b border-[#3d7596]/30 pb-3">
+                                    <div>
+                                        <span class="text-[9px] font-bold uppercase tracking-widest text-[#799eb0]">${era.years}</span>
+                                        <h2 class="text-base font-extrabold uppercase tracking-tight text-white mt-0.5">${era.title}</h2>
+                                    </div>
+                                    <div class="text-right flex flex-col items-end">
+                                        <svg id="slide-logo" class="h-4 transition-colors" viewBox="0 0 542.88 149.44" height="16">
+                                            <path fill="currentColor" d="M521.11,9.55c1.38-1.31,4.7-1.98,9.95-1.98h11.83V0h-68.91V7.57h11.73c5.05,0,8.52,.78,10.4,2.33,1.21,1.01,1.83,3.67,1.83,7.99v113.17c0,4.52-.68,7.44-2.03,8.79-1.35,1.36-4.32,2.03-8.89,2.03h-46.67c-4.24,0-7.17-.78-8.79-2.33-1.21-1.15-1.83-3.97-1.83-8.49V17.89c0-4.25,.7-7.03,2.08-8.34,1.38-1.31,4.7-1.98,9.97-1.98h11.81V0h-68.91V7.57h11.73c5.05,0,8.52,.78,10.4,2.33,1.21,1.01,1.83,3.67,1.83,7.99v113.17c0,4.52-.68,7.44-2.03,8.79-1.35,1.36-4.3,2.03-8.89,2.03h-46.67c-4.24,0-7.17-.78-8.79-2.33-1.21-1.15-1.81-3.97-1.81-8.49V17.89c0-4.25,.68-7.03,2.06-8.34,1.38-1.31,4.7-1.98,9.97-1.98h11.81V0h-68.91V7.57h11.73c5.05,0,8.52,.78,10.4,2.33,1.23,1.01,1.83,3.67,1.83,7.99v113.17c0,4.52-.68,7.44-2.03,8.79-1.35,1.36-4.3,2.03-8.89,2.03h-28.47c-4.9-.07-8.34-.51-10.31-1.36-1.98-.85-3.64-2.24-4.98-4.2l-47.22-68.08,30.83-44.89c3.89-5.8,8.14-10.03,12.76-12.72,3.42-2.03,8.07-3.04,13.98-3.04V0h-54.18V7.57c6.66,.07,11.19,.88,13.64,2.42,2.42,1.56,3.62,3.64,3.62,6.26s-1.41,6.11-4.24,10.41l-21.94,33.35-28.68-42.04c-1.96-2.84-2.94-4.75-2.94-5.76,0-1.35,.86-2.46,2.57-3.34,1.73-.86,5.18-1.31,10.38-1.31h7.17V0H81.75V7.57c6.66,.07,11.19,.88,13.62,2.42,2.42,1.56,3.64,3.64,3.64,6.26s-1.41,6.11-4.25,10.41l-21.92,33.35L44.13,17.99c-1.94-2.84-2.92-4.75-2.92-5.76,0-1.35,.86-2.46,2.57-3.34,1.71-.86,5.18-1.31,10.36-1.31h7.19V0H0V7.57c5.45,.07,9.43,.76,11.92,2.08,2.49,1.31,5.35,4.28,8.59,8.94l40.89,58.51-31.69,45.77c-4.52,6.61-9.12,11.38-13.8,14.3-4.68,2.94-9.98,4.5-15.91,4.7v7.57H56.98v-7.57h-5.85c-4.04,0-7.11-.9-9.2-2.67-2.08-1.79-3.12-4.33-3.12-7.64,0-3.9,1.78-8.42,5.35-13.54l22.62-32.4,30.59,44.33c2.03,2.97,3.04,5.22,3.04,6.78,0,1.48-.76,2.71-2.28,3.69-1.53,.98-4.29,1.46-8.27,1.46h-8.22v7.57h114.42v-7.57h-5.86c-4.04,0-7.11-.9-9.18-2.67-2.09-1.79-3.14-4.33-3.14-7.64,0-3.9,1.79-8.42,5.36-13.54l22.6-32.4,30.61,44.33c2.03,2.97,3.02,5.22,3.02,6.78,0,1.48-.75,2.71-2.28,3.69-1.51,.98-4.27,1.46-8.25,1.46h-8.24v7.57h322.17v-7.57h-13.24c-4.24,0-7.17-.78-8.79-2.33-1.21-1.15-1.83-3.97-1.83-8.49V17.89c0-4.25,.7-7.03,2.08-8.34ZM168.78,122.87c-4.52,6.61-9.12,11.38-13.79,14.3-4.55,2.86-9.7,4.4-15.43,4.67-4.2-.12-7.21-.56-9-1.33-1.98-.85-3.64-2.24-4.98-4.2l-47.23-68.08,30.83-44.89c3.89-5.8,8.15-10.03,12.77-12.72,3.4-2.01,9.67-3.02,15.55-3.04,5.43,.08,11.03,.76,13.5,2.08,2.49,1.31,5.36,4.28,8.59,8.94l40.89,58.51-31.69,45.77Z"/>
+                                        </svg>
+                                        <span class="text-[6.5px] text-[#b5b5be] font-semibold mt-1 uppercase">Realidad Política Nacional / Local</span>
+                                    </div>
+                                </div>
+                                
+                                <!-- Contenido Central del Slide: Dos columnas -->
+                                <div class="grid grid-cols-2 gap-6 my-4 flex-1">
+                                    <!-- Izquierda: Líderes y Poder -->
+                                    <div class="space-y-3 border-r border-[#3d7596]/20 pr-3">
+                                        <span class="text-[8px] uppercase tracking-wider text-[#b5b5be] font-bold block">// ESTRUCTURA DE PODER</span>
+                                        
+                                        <div class="flex items-center gap-2.5">
+                                            <div class="w-8 h-8 rounded-[4px_0_4px_0] border border-[#3d7596]/20 flex-shrink-0 bg-[#1c1c1c] overflow-hidden">
+                                                ${getLeaderAvatar(era.national, 'bg-[#004c7d]')}
+                                            </div>
+                                            <div class="flex-1 min-w-0">
+                                                <h4 class="text-[9px] font-bold uppercase text-white leading-normal break-words">${era.national.name}</h4>
+                                                <span class="text-[7px] text-[#b5b5be] uppercase block leading-normal break-words">${era.national.role}</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="flex items-center gap-2.5">
+                                            <div class="w-8 h-8 rounded-[4px_0_4px_0] border border-[#3d7596]/20 flex-shrink-0 bg-[#1c1c1c] overflow-hidden">
+                                                ${getLeaderAvatar(era.regional, 'bg-[#0e344d]')}
+                                            </div>
+                                            <div class="flex-1 min-w-0">
+                                                <h4 class="text-[9px] font-bold uppercase text-white leading-normal break-words">${era.regional.name}</h4>
+                                                <span class="text-[7px] text-[#b5b5be] uppercase block leading-normal break-words">${era.regional.role}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Derecha: Síntesis e Impacto Laboral -->
+                                    <div class="space-y-3">
+                                        <span class="text-[8px] uppercase tracking-wider text-[#b5b5be] font-bold block">// IMPACTO LABORAL</span>
+                                        <p class="text-[9px] font-bold text-[#799eb0] leading-tight">${era.impact.title}</p>
+                                        <ul class="space-y-1.5">
+                                            ${era.impact.points.slice(0, 2).map(pt => `
+                                                <li class="flex items-start gap-1">
+                                                    <span class="text-[#799eb0] font-bold text-[8px]">&#9656;</span>
+                                                    <p class="text-[8px] text-[#b5b5be] leading-tight">${pt.replace(/<\/?strong>/g, '')}</p>
+                                                </li>
+                                            `).join('')}
+                                        </ul>
+                                    </div>
+                                </div>
+                                
+                                <!-- Pie de la Diapositiva -->
+                                <div class="border-t border-[#3d7596]/30 pt-2 flex justify-between items-center text-[7px] text-[#b5b5be]">
+                                    <span>Generado de XXIII Magazine — ${new Date().toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' })}</span>
+                                    <span>Fuente: ${era.source}</span>
+                                </div>
+                                
+                            </div>
+                        </div>
+                    </div>
+                    ${getNavigationControlsHTML()}
+                `;
+            }
+            // Re-inicializar iconos vectoriales cargados dinámicamente
+            lucide.createIcons();
+        }
+
+        // Modal de Fichas Biográficas
+        function openBioModal(type) {
+            const era = timelineData.find(e => e.id === currentEraId);
+            const leader = type === 'national' ? era.national : era.regional;
+            
+            document.getElementById('modal-name').innerText = leader.name;
+            document.getElementById('modal-role-label').innerText = type === 'national' ? 'Líder Nacional' : 'Líder Regional (Apure)';
+            document.getElementById('modal-party').innerText = leader.role;
+            
+            const avatarBox = document.getElementById('modal-avatar-box');
+            avatarBox.innerHTML = getLeaderAvatar(leader, type === 'national' ? 'bg-[#004c7d]' : 'bg-[#0e344d]');
+
+            const modalContent = document.getElementById('modal-bio-content');
+            modalContent.innerHTML = `
+                <p class="font-semibold text-[#f5f5f7] mb-2 text-xs md:text-sm">${leader.context}</p>
+                <p class="text-xs text-[#b5b5be] leading-relaxed">${leader.bio}</p>
+            `;
+
+            document.getElementById('bio-modal').classList.remove('hidden');
+            
+            // Animación suave de traslación vertical y opacidad
+            gsap.fromTo('#bio-card', { y: 20, opacity: 0 }, { y: 0, opacity: 1, duration: 0.3, ease: 'power2.out' });
+        }
+
+        function closeBioModal() {
+            gsap.to('#bio-card', { 
+                y: 20, 
+                opacity: 0, 
+                duration: 0.2, 
+                ease: 'power2.in',
+                onComplete: () => {
+                    document.getElementById('bio-modal').classList.add('hidden');
+                }
+            });
+        }
+
+        // Inicialización y actualización generativa del Gráfico (Chart.js)
+        function initEraChart() {
+            const ctx = document.getElementById('politicalChart').getContext('2d');
+            
+            const isLight = document.body.classList.contains('light-theme');
+            const gridColor = isLight ? 'rgba(0, 76, 125, 0.1)' : 'rgba(61, 117, 150, 0.15)';
+            const textColor = isLight ? '#1c1c1c' : '#b5b5be';
+            const tooltipBg = isLight ? '#f2f0e3' : '#1c1c1c';
+            const tooltipBorder = isLight ? 'rgba(0, 76, 125, 0.3)' : '#3d7596';
+
+            const fullLabels = ['1989', '1992', '1996', '1999', '2000', '2004', '2008', '2011', '2012', '2017', '2021', '2023', '2024', '2025', '2026'];
+            const fullDebilidad = [30, 32, 35, 40, 50, 65, 75, 78, 85, 92, 95, 96, 90, 88, 85];
+            const fullTalento = [70, 68, 65, 60, 50, 42, 35, 30, 20, 10, 5, 4, 10, 15, 20];
+
+            const activeIndex = timelineData.findIndex(e => e.id === currentEraId);
+            
+            let displayLabels = fullLabels;
+            let displayDebilidad = fullDebilidad;
+            let displayTalento = fullTalento;
+
+            if (chartMode === 'focused') {
+                displayLabels = fullLabels.slice(0, activeIndex + 1);
+                displayDebilidad = fullDebilidad.slice(0, activeIndex + 1);
+                displayTalento = fullTalento.slice(0, activeIndex + 1);
+            }
+
+            // Crear gradientes tácticas con los nuevos tonos azules
+            const gradDebilidad = ctx.createLinearGradient(0, 0, 0, 200);
+            gradDebilidad.addColorStop(0, 'rgba(0, 76, 125, 0.4)'); /* #004c7d */
+            gradDebilidad.addColorStop(1, 'rgba(0, 76, 125, 0.0)');
+
+            const gradTalento = ctx.createLinearGradient(0, 0, 0, 200);
+            gradTalento.addColorStop(0, 'rgba(121, 158, 176, 0.25)'); /* #799eb0 */
+            gradTalento.addColorStop(1, 'rgba(121, 158, 176, 0.0)');
+
+            // Destacar la época activa con el tono claro de la paleta
+            const pointSizes = displayLabels.map((_, i) => (chartMode === 'full' && i === activeIndex) || (chartMode === 'focused' && i === displayLabels.length - 1) ? 8 : 3);
+            const pointColors = displayLabels.map((_, i) => (chartMode === 'full' && i === activeIndex) || (chartMode === 'focused' && i === displayLabels.length - 1) ? '#b5c7c9' : '#3d7596');
+
+            chartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: displayLabels,
+                    datasets: [
+                        {
+                            label: 'Índice de Debilidad Institucional (%)',
+                            data: displayDebilidad,
+                            borderColor: '#004c7d', /* Deep Blue */
+                            backgroundColor: gradDebilidad,
+                            borderWidth: 2,
+                            tension: 0.3,
+                            fill: true,
+                            pointRadius: pointSizes,
+                            pointBackgroundColor: '#004c7d',
+                            pointHoverRadius: 7
+                        },
+                        {
+                            label: 'Oportunidades de Desarrollo Profesional (%)',
+                            data: displayTalento,
+                            borderColor: '#799eb0', /* Light Blue */
+                            backgroundColor: gradTalento,
+                            borderWidth: 2,
+                            borderDash: [4, 4],
+                            tension: 0.3,
+                            fill: false,
+                            pointRadius: pointSizes,
+                            pointBackgroundColor: pointColors,
+                            pointHoverRadius: 7
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                boxWidth: 8,
+                                font: { size: 8, family: "'Poppins', sans-serif" },
+                                color: textColor
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: tooltipBg,
+                            borderColor: tooltipBorder,
+                            borderWidth: 1,
+                            titleFont: { family: "'Poppins', sans-serif", size: 9 },
+                            bodyFont: { family: "'Poppins', sans-serif", size: 8 },
+                            padding: 8
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: {
+                                font: { size: 7, family: "'Poppins', sans-serif" },
+                                color: textColor
+                            },
+                            grid: { color: gridColor }
+                        },
+                        x: {
+                            ticks: {
+                                font: { size: 7, family: "'Poppins', sans-serif" },
+                                color: textColor
+                            },
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateChart() {
+            if (chartInstance) {
+                chartInstance.destroy();
+            }
+            initEraChart();
+        }
+
+        // Exportador de diapositiva actual usando html2canvas (Forzando dimensiones fijas de escritorio)
+        function exportCurrentSlide() {
+            const slideArea = document.getElementById('slide-capture-area');
+            if (!slideArea) return;
+            
+            // Guardar estilos originales
+            const originalStyle = slideArea.style.cssText;
+            
+            // Forzar dimensiones de escritorio 16:9 fijas antes de la captura
+            slideArea.style.width = '1024px';
+            slideArea.style.height = '576px';
+            slideArea.style.maxWidth = 'none';
+            slideArea.style.maxHeight = 'none';
+            
+            const isLight = document.body.classList.contains('light-theme');
+            html2canvas(slideArea, {
+                scale: 2,
+                width: 1024,
+                height: 576,
+                backgroundColor: isLight ? '#f2f0e3' : '#1c1c1c',
+                logging: false,
+                useCORS: true
+            }).then(canvas => {
+                // Restaurar estilos responsivos originales
+                slideArea.style.cssText = originalStyle;
+                
+                const link = document.createElement('a');
+                const filename = `Diapositiva_${currentEraId}.jpg`;
+                link.download = filename;
+                link.href = canvas.toDataURL('image/jpeg', 0.95);
+                link.click();
+            }).catch(err => {
+                slideArea.style.cssText = originalStyle;
+                console.error("Error al exportar diapositiva:", err);
+            });
+        }
+
+        // Alternar Tema (Claro / Oscuro)
+        function toggleTheme() {
+            const body = document.body;
+            body.classList.toggle('light-theme');
+            const isLight = body.classList.contains('light-theme');
+            
+            localStorage.setItem('theme', isLight ? 'light' : 'dark');
+            
+            const icon = document.getElementById('theme-icon');
+            const text = document.getElementById('theme-text');
+            if (icon && text) {
+                if (isLight) {
+                    icon.setAttribute('data-lucide', 'moon');
+                    text.innerText = 'Modo Oscuro';
+                } else {
+                    icon.setAttribute('data-lucide', 'sun');
+                    text.innerText = 'Modo Claro';
+                }
+                lucide.createIcons();
+            }
+            
+            // Re-renderizar elementos dependientes del tema
+            renderTimeline();
+            renderContent();
+        }
+
+        // Carga de página inicial y vinculación de eventos
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'light') {
+                document.body.classList.add('light-theme');
+                const icon = document.getElementById('theme-icon');
+                const text = document.getElementById('theme-text');
+                if (icon && text) {
+                    icon.setAttribute('data-lucide', 'moon');
+                    text.innerText = 'Modo Oscuro';
+                }
+            }
+            renderTimeline();
+            lucide.createIcons();
+        });
+    </script>
+</body>
+</html>
