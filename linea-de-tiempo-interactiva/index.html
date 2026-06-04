@@ -797,7 +797,11 @@
         // Helper para renderizar avatares sin stacking issues adaptado a marcos (object-cover w-full h-full)
         function getLeaderAvatar(leader, bgClass = 'bg-[#004c7d]') {
             if (leader.avatarImg && leader.avatarImg.trim() !== '') {
-                return `<img src="${leader.avatarImg}" alt="${leader.name}" class="w-full h-full object-cover" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                let imgUrl = leader.avatarImg;
+                if (!imgUrl.startsWith('http://') && !imgUrl.startsWith('https://')) {
+                    imgUrl = (typeof XXIII_ASSETS_URL !== 'undefined' ? XXIII_ASSETS_URL : '') + imgUrl;
+                }
+                return `<img src="${imgUrl}" alt="${leader.name}" class="w-full h-full object-cover" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                         <div class="w-full h-full flex items-center justify-center ${bgClass} text-white font-bold text-xs" style="display: none;">${leader.avatarText}</div>`;
             } else {
                 return `<div class="w-full h-full flex items-center justify-center ${bgClass} text-white font-bold text-xs">${leader.avatarText}</div>`;
