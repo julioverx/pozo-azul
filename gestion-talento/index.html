@@ -1,0 +1,1909 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión del Talento en la Realidad Territorial - Pozo Azul</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* === 1. VARIABLES Y DISEÃ‘O BASE INMERSIVO === */
+        :root {
+            --blue-deep: #020617;
+            --blue-mid: #071930;
+            --blue-accent: #0f2d54;
+            --blue-glow: #0ea5e9;
+            --white: #ffffff;
+            --white-soft: rgba(255, 255, 255, 0.9);
+            --white-muted: rgba(255, 255, 255, 0.55);
+            --white-ghost: rgba(255, 255, 255, 0.02);
+            --white-line: rgba(255, 255, 255, 0.08);
+            --bg-overlay: rgba(2, 6, 23, 0.4);
+            --bg-overlay-glow: rgba(14, 165, 233, 0.03);
+            --accent-warn: #fb923c;
+            --accent-warn-soft: rgba(251, 146, 60, 0.08);
+            --accent-success: #4ade80;
+            --accent-success-soft: rgba(74, 222, 128, 0.06);
+            --accent-danger: #ef4444;
+            --accent-danger-soft: rgba(239, 68, 68, 0.06);
+            
+            --radius-leaf: 12px;
+            --radius-btn: 6px;
+            --radius-tag: 4px;
+
+            --bg-grad-1: rgba(2, 6, 23, 0.8);
+            --bg-grad-2: rgba(7, 25, 48, 0.8);
+            --bg-grad-3: rgba(3, 7, 18, 0.8);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: #020617;
+            background-image: linear-gradient(160deg, var(--bg-grad-1) 0%, var(--bg-grad-2) 50%, var(--bg-grad-3) 100%);
+            color: var(--white);
+            font-family: 'Poppins', sans-serif;
+            line-height: 1.6;
+            padding: 40px 16px;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+            transition: background-color 0.6s cubic-bezier(0.25, 0.8, 0.25, 1), background-image 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        body.game-state-fail {
+            background-color: #1a0505;
+            --bg-grad-1: rgba(42, 8, 8, 0.9);
+            --bg-grad-2: rgba(26, 5, 5, 0.9);
+            --bg-grad-3: rgba(15, 3, 3, 0.9);
+            --blue-glow: #ef4444;
+            --white-line: rgba(239, 68, 68, 0.25);
+        }
+
+        body.game-state-success {
+            background-color: #021a0c;
+            --bg-grad-1: rgba(4, 37, 18, 0.9);
+            --bg-grad-2: rgba(2, 26, 12, 0.9);
+            --bg-grad-3: rgba(1, 15, 7, 0.9);
+            --blue-glow: #10b981;
+            --white-line: rgba(16, 185, 129, 0.25);
+        }
+
+        /* === 2. CONTENEDOR PRINCIPAL (INVISIBLE) === */
+        .xxiii-app-container {
+            width: 100%;
+            max-width: 920px;
+            background: transparent;
+            border: none;
+            border-radius: 0;
+            padding: 0;
+            box-shadow: none;
+        }
+
+        /* === HEADER MÃNIMO === */
+        .xxiii-header {
+            border-bottom: 1px solid var(--white-line);
+            padding-bottom: 20px;
+            margin-bottom: 35px;
+            text-align: center;
+        }
+
+        .xxiii-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--white);
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-bottom: 8px;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+        }
+
+        .xxiii-subtitle {
+            font-size: 11px;
+            color: var(--white-muted);
+            font-weight: 300;
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
+        }
+
+        /* === BARRA DE PROGRESO === */
+        .game-progress-wrapper {
+            margin-bottom: 30px;
+            background: var(--bg-overlay);
+            border: 1px solid var(--white-line);
+            border-radius: var(--radius-btn);
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .game-progress-info {
+            font-size: 9px;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: var(--white-muted);
+            letter-spacing: 1.5px;
+        }
+
+        .game-progress-bar-container {
+            width: 65%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .game-progress-bar-fill {
+            height: 100%;
+            width: 25%;
+            background: var(--blue-glow);
+            box-shadow: 0 0 8px var(--blue-glow);
+            transition: width 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        /* === 3. NAVEGACIÃ“N POR NODOS === */
+        .xxiii-nav-flow {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-bottom: 40px;
+        }
+
+        @media (max-width: 768px) {
+            .xxiii-nav-flow {
+                grid-template-columns: 1fr 1fr;
+                gap: 8px;
+            }
+        }
+
+        .xxiii-nav-node {
+            background: var(--bg-overlay);
+            border: 1px solid var(--white-line);
+            border-radius: var(--radius-btn);
+            padding: 14px 16px;
+            text-align: left;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            cursor: pointer;
+            backdrop-filter: blur(5px);
+        }
+
+        .xxiii-nav-node:hover {
+            border-color: rgba(14, 165, 233, 0.4);
+            background: rgba(14, 165, 233, 0.02);
+        }
+
+        .xxiii-nav-node.active {
+            background: rgba(14, 165, 233, 0.08);
+            border-color: var(--blue-glow);
+            box-shadow: 0 0 15px rgba(14, 165, 233, 0.15);
+        }
+
+        .xxiii-nav-node.active .node-num {
+            color: var(--blue-glow);
+            text-shadow: 0 0 8px rgba(14, 165, 233, 0.4);
+        }
+
+        .xxiii-nav-node.active .node-name {
+            color: var(--white);
+        }
+
+        .xxiii-nav-node.disabled {
+            opacity: 0.18;
+            cursor: not-allowed;
+            pointer-events: none;
+            border-color: transparent;
+        }
+
+        .xxiii-nav-node.completed {
+            border-color: rgba(74, 222, 128, 0.25);
+            background: rgba(74, 222, 128, 0.03);
+        }
+
+        .xxiii-nav-node.completed .node-name {
+            color: var(--accent-success);
+        }
+
+        .xxiii-nav-node.completed .node-num {
+            color: rgba(74, 222, 128, 0.6);
+        }
+
+        .xxiii-nav-node .node-num {
+            font-size: 8px;
+            font-weight: 700;
+            color: var(--white-muted);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        .xxiii-nav-node .node-name {
+            font-size: 11px;
+            font-weight: 500;
+            line-height: 1.3;
+            color: var(--white-soft);
+            letter-spacing: 0.5px;
+        }
+
+        /* === 4. CUERPO DEL NODO === */
+        .xxiii-node-content {
+            display: none;
+        }
+
+        .xxiii-node-content.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* === ENFOQUE CRÃTICO === */
+        .xxiii-critique-box {
+            background: rgba(14, 165, 233, 0.02);
+            border: 1px solid rgba(14, 165, 233, 0.15);
+            border-left: 3px solid var(--blue-glow);
+            padding: 20px 24px;
+            border-radius: var(--radius-btn);
+            margin-bottom: 30px;
+        }
+
+        .xxiii-critique-box h4 {
+            color: var(--blue-glow);
+            font-size: 9px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2.5px;
+            margin-bottom: 8px;
+            text-shadow: 0 0 8px rgba(14, 165, 233, 0.3);
+        }
+
+        .xxiii-critique-box p {
+            font-size: 12px;
+            line-height: 1.6;
+            font-weight: 300;
+            font-style: italic;
+            color: var(--white-soft);
+        }
+
+        /* === DILEMAS (GAME MODE) === */
+        .dilemma-container {
+            background: var(--bg-overlay);
+            border: 1px solid var(--white-line);
+            border-radius: var(--radius-leaf);
+            padding: 35px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+        }
+
+        .dilemma-title {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--accent-warn);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--white-line);
+            padding-bottom: 12px;
+            text-shadow: 0 0 10px rgba(251, 146, 60, 0.2);
+        }
+
+        .dilemma-desc {
+            font-size: 13px;
+            color: var(--white-soft);
+            line-height: 1.7;
+            margin-bottom: 30px;
+            font-weight: 300;
+        }
+
+        .dilemma-desc strong {
+            color: var(--white);
+            font-weight: 600;
+        }
+
+        .dilemma-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        @media (max-width: 600px) {
+            .dilemma-options {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .dilemma-card-btn {
+            background: rgba(255, 255, 255, 0.01);
+            border: 1px solid var(--white-line);
+            border-radius: var(--radius-leaf);
+            padding: 24px;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            font-family: inherit;
+            color: var(--white);
+        }
+
+        .dilemma-card-btn:hover {
+            border-color: var(--blue-glow);
+            background: rgba(14, 165, 233, 0.04);
+            box-shadow: 0 0 15px rgba(14, 165, 233, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .dilemma-card-btn h5 {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+            color: var(--blue-glow);
+            text-shadow: 0 0 6px rgba(14, 165, 233, 0.2);
+        }
+
+        .dilemma-card-btn p {
+            font-size: 11px;
+            line-height: 1.6;
+            color: var(--white-muted);
+            font-weight: 300;
+        }
+
+        /* === PANTALLAS Ã‰XITO / FALLO === */
+        .game-result-screen {
+            border-radius: var(--radius-leaf);
+            padding: 35px;
+            margin-bottom: 30px;
+            display: none;
+            animation: fadeIn 0.5s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .game-result-screen.fail {
+            background: rgba(251, 146, 60, 0.03);
+            border: 1px solid rgba(251, 146, 60, 0.25);
+            box-shadow: 0 0 20px rgba(251, 146, 60, 0.1);
+        }
+
+        .game-result-screen.fail .result-screen-title {
+            color: var(--accent-warn);
+            text-shadow: 0 0 10px rgba(251, 146, 60, 0.3);
+        }
+
+        .game-result-screen.success {
+            background: rgba(74, 222, 128, 0.03);
+            border: 1px solid rgba(74, 222, 128, 0.25);
+            box-shadow: 0 0 20px rgba(74, 222, 128, 0.1);
+        }
+
+        .game-result-screen.success .result-screen-title {
+            color: var(--accent-success);
+            text-shadow: 0 0 10px rgba(74, 222, 128, 0.3);
+        }
+
+        .result-screen-title {
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 15px;
+        }
+
+        .result-screen-desc {
+            font-size: 12px;
+            line-height: 1.7;
+            margin-bottom: 25px;
+            color: var(--white-soft);
+            font-weight: 300;
+        }
+
+        .result-screen-desc strong {
+            color: var(--white);
+            font-weight: 600;
+        }
+
+        /* === SANDBOX === */
+        .sandbox-area {
+            display: none;
+        }
+
+        .sandbox-unlocked-badge {
+            background: rgba(74, 222, 128, 0.05);
+            color: var(--accent-success);
+            font-size: 8px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            padding: 6px 14px;
+            border-radius: var(--radius-tag);
+            border: 1px solid rgba(74, 222, 128, 0.2);
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+
+        /* === DOS COLUMNAS === */
+        .xxiii-two-col {
+            display: grid;
+            grid-template-columns: 1fr 1.3fr;
+            gap: 30px;
+            align-items: start;
+        }
+
+        @media (max-width: 900px) {
+            .xxiii-two-col {
+                grid-template-columns: 1fr;
+                gap: 24px;
+            }
+        }
+
+        /* === TEORÃA === */
+        .xxiii-theory-column h3 {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--blue-glow);
+            margin-bottom: 16px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 0 0 8px rgba(14, 165, 233, 0.2);
+        }
+
+        .xxiii-theory-column p, .xxiii-theory-column li {
+            font-size: 11px;
+            color: var(--white-muted);
+            margin-bottom: 12px;
+            font-weight: 300;
+            line-height: 1.65;
+        }
+
+        .xxiii-theory-column strong {
+            color: var(--white-soft);
+            font-weight: 600;
+        }
+
+        .xxiii-theory-column ul {
+            padding-left: 16px;
+            margin-bottom: 12px;
+        }
+
+        /* === WIDGET INTERACTIVO === */
+        .xxiii-interactive-widget {
+            border: 1px solid var(--white-line);
+            border-radius: var(--radius-leaf);
+            padding: 28px;
+            background: var(--bg-overlay);
+            backdrop-filter: blur(10px);
+        }
+
+        .widget-title {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--white-muted);
+            margin-bottom: 24px;
+            border-bottom: 1px solid var(--white-line);
+            padding-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .widget-title svg {
+            stroke: var(--blue-glow);
+            filter: drop-shadow(0 0 4px var(--blue-glow));
+        }
+
+        /* === FORMULARIOS === */
+        .xxiii-form-group {
+            margin-bottom: 22px;
+        }
+
+        .xxiii-form-group label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+            color: var(--white-muted);
+        }
+
+        .xxiii-form-group label span {
+            color: var(--blue-glow);
+            font-weight: 700;
+            text-shadow: 0 0 6px rgba(14, 165, 233, 0.3);
+        }
+
+        .xxiii-range {
+            width: 100%;
+            -webkit-appearance: none;
+            background: rgba(255, 255, 255, 0.05);
+            height: 4px;
+            outline: none;
+            border-radius: 2px;
+            transition: background 0.3s;
+        }
+
+        .xxiii-range:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .xxiii-range::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 14px;
+            height: 14px;
+            background: var(--blue-glow);
+            box-shadow: 0 0 8px var(--blue-glow);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform 0.15s ease;
+            border: 2px solid var(--blue-deep);
+        }
+
+        .xxiii-range::-webkit-slider-thumb:hover {
+            transform: scale(1.3);
+        }
+
+        /* === BOTONES === */
+        .xxiii-btn {
+            background: transparent;
+            color: var(--blue-glow);
+            border: 1px solid var(--blue-glow);
+            padding: 10px 22px;
+            font-size: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            border-radius: var(--radius-btn);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-family: inherit;
+        }
+
+        .xxiii-btn:hover {
+            background: var(--blue-glow);
+            color: var(--white);
+            box-shadow: 0 0 15px rgba(14, 165, 233, 0.4);
+            transform: translateY(-1px);
+        }
+
+        .xxiii-btn-secondary {
+            background: transparent;
+            color: var(--white-soft);
+            border: 1px solid var(--white-line);
+        }
+
+        .xxiii-btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.03);
+            border-color: var(--white-muted);
+            box-shadow: none;
+        }
+
+        .xxiii-btn-success {
+            background: transparent;
+            color: var(--accent-success);
+            border: 1px solid rgba(74, 222, 128, 0.4);
+        }
+
+        .xxiii-btn-success:hover {
+            background: var(--accent-success);
+            color: var(--blue-deep);
+            border-color: var(--accent-success);
+            box-shadow: 0 0 15px rgba(74, 222, 128, 0.4);
+        }
+
+        /* === ADVANCE WRAPPER === */
+        .level-advance-wrapper {
+            margin-top: 35px;
+            border-top: 1px solid var(--white-line);
+            padding-top: 25px;
+            text-align: right;
+        }
+
+        /* === CALCULADORA (WIDGET I) === */
+        .calc-result-box {
+            background: rgba(255, 255, 255, 0.01);
+            border: 1px solid var(--white-line);
+            border-radius: var(--radius-btn);
+            padding: 16px;
+            margin-top: 22px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .calc-result-title {
+            font-size: 8px;
+            font-weight: 700;
+            color: var(--white-muted);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+        }
+
+        .calc-result-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--white);
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.15);
+        }
+
+        .alert-card {
+            padding: 14px 18px;
+            border-radius: var(--radius-btn);
+            font-size: 11px;
+            line-height: 1.55;
+            font-weight: 300;
+        }
+
+        .alert-card strong {
+            font-weight: 600;
+        }
+
+        .alert-card.warn {
+            background: rgba(251, 146, 60, 0.02);
+            border: 1px solid rgba(251, 146, 60, 0.2);
+            color: var(--accent-warn);
+        }
+
+        .alert-card.success {
+            background: rgba(74, 222, 128, 0.02);
+            border: 1px solid rgba(74, 222, 128, 0.15);
+            color: var(--accent-success);
+        }
+
+        .alert-card.danger {
+            background: rgba(239, 68, 68, 0.02);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            color: var(--accent-danger);
+        }
+
+        /* === ESCÃNER (WIDGET II) === */
+        .scanner-container {
+            display: grid;
+            grid-template-columns: 1fr 1.3fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 600px) {
+            .scanner-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .scanner-visual {
+            background: rgba(2, 6, 23, 0.3);
+            border: 1px solid var(--white-line);
+            border-radius: var(--radius-btn);
+            height: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .scanner-hotspot {
+            position: absolute;
+            width: 22px;
+            height: 22px;
+            background-color: transparent;
+            border: 2px solid var(--accent-warn);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent-warn);
+            font-size: 9px;
+            font-weight: 700;
+            box-shadow: 0 0 8px rgba(251, 146, 60, 0.4);
+        }
+
+        .scanner-hotspot:hover {
+            transform: scale(1.25);
+            background-color: var(--blue-glow);
+            border-color: var(--blue-glow);
+            color: var(--white);
+            box-shadow: 0 0 12px var(--blue-glow);
+        }
+
+        .scanner-hotspot.active {
+            background-color: var(--blue-glow);
+            border-color: var(--blue-glow);
+            color: var(--white);
+            transform: scale(1.15);
+            box-shadow: 0 0 15px var(--blue-glow);
+            animation: pulse-glow 2s infinite;
+        }
+
+        @keyframes pulse-glow {
+            0% { box-shadow: 0 0 0 0 rgba(14, 165, 233, 0.5); }
+            70% { box-shadow: 0 0 0 8px rgba(14, 165, 233, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(14, 165, 233, 0); }
+        }
+
+        /* === POSICIONAMIENTO DE HOTSPOTS === */
+        #hotspot-mental { top: 12.5%; left: 50%; transform: translateX(-50%); }
+        #hotspot-ruido { top: 12.5%; left: 63%; }
+        #hotspot-ergonomia { top: 39.5%; left: 50%; transform: translateX(-50%); }
+        #hotspot-mecanico { top: 48%; left: 18%; }
+
+        .scanner-details {
+            background: rgba(255, 255, 255, 0.01);
+            border: 1px solid var(--white-line);
+            border-radius: var(--radius-btn);
+            padding: 20px;
+            font-size: 11px;
+            color: var(--white-soft);
+        }
+
+        .scanner-details h4 {
+            color: var(--blue-glow);
+            font-size: 12px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            text-shadow: 0 0 8px rgba(14, 165, 233, 0.3);
+        }
+
+        .scanner-details .detail-section {
+            margin-bottom: 16px;
+        }
+
+        .scanner-details .detail-label {
+            font-weight: 700;
+            font-size: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--white-muted);
+            margin-bottom: 4px;
+        }
+
+        .scanner-details p {
+            font-weight: 300;
+            font-size: 11px;
+            color: var(--white-soft);
+            line-height: 1.55;
+        }
+
+        /* === EVAPORACIÃ“N (WIDGET III) === */
+        .vessel-outer {
+            width: 100%;
+            height: 40px;
+            background: rgba(2, 6, 23, 0.3);
+            border: 1px solid var(--white-line);
+            border-radius: var(--radius-btn);
+            margin-bottom: 24px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .vessel-liquid {
+            height: 100%;
+            width: 70%;
+            background-color: var(--bar-color, var(--blue-glow));
+            background-image: linear-gradient(90deg, rgba(255, 255, 255, 0.15), transparent);
+            box-shadow: 0 0 10px var(--bar-color, var(--blue-glow));
+            transition: width 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), background-color 0.4s ease, box-shadow 0.4s ease;
+        }
+
+        .vessel-bubbles {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .bubble {
+            position: absolute;
+            bottom: -10px;
+            width: 5px;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            animation: floatUp 2s infinite linear;
+        }
+
+        @keyframes floatUp {
+            0% { transform: translateY(0) translateX(0); opacity: 0.6; }
+            100% { transform: translateY(-60px) translateX(var(--b-x, 10px)); opacity: 0; }
+        }
+
+        /* === DESTILADOR (WIDGET IV) === */
+        .destilador-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.3fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 600px) {
+            .destilador-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .destilador-column {
+            background: rgba(255, 255, 255, 0.01);
+            border: 1px solid var(--white-line);
+            border-radius: var(--radius-btn);
+            padding: 18px;
+        }
+
+        .destilador-col-title {
+            font-size: 8px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--white-muted);
+            margin-bottom: 14px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .human-container {
+            height: 140px;
+            border: 1px solid var(--white-line);
+            border-radius: var(--radius-leaf);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(2, 6, 23, 0.3);
+        }
+
+        .human-avatar {
+            font-size: 44px;
+            transition: opacity 0.5s ease, transform 0.5s ease;
+            filter: drop-shadow(0 0 10px var(--blue-glow));
+        }
+
+        .human-avatar.faded {
+            opacity: 0.15;
+            transform: scale(0.8);
+            filter: none;
+        }
+
+        .structural-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .structural-slot {
+            border: 1px dashed rgba(255, 255, 255, 0.15);
+            border-radius: 4px;
+            padding: 10px;
+            text-align: center;
+            font-size: 9px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--white-muted);
+            transition: all 0.3s ease;
+        }
+
+        .structural-slot.filled {
+            border-style: solid;
+            border-color: rgba(74, 222, 128, 0.35);
+            background: rgba(74, 222, 128, 0.05);
+            color: var(--accent-success);
+            text-shadow: 0 0 6px rgba(74, 222, 128, 0.4);
+            box-shadow: 0 0 8px rgba(74, 222, 128, 0.1);
+        }
+
+        .destilador-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .destilador-result {
+            margin-top: 18px;
+        }
+
+        /* === SVG SILUETA === */
+        .human-silhouette-svg {
+            width: 100px;
+            height: 240px;
+            fill: none;
+            stroke: rgba(14, 165, 233, 0.3);
+            stroke-width: 1.5;
+            filter: drop-shadow(0 0 8px rgba(14, 165, 233, 0.15));
+        }
+
+        /* === PANTALLA FINAL === */
+        .game-complete-screen {
+            display: none;
+            background: rgba(74, 222, 128, 0.02);
+            border: 1px solid rgba(74, 222, 128, 0.25);
+            border-radius: var(--radius-leaf);
+            padding: 40px;
+            text-align: center;
+            animation: fadeIn 0.5s ease;
+            box-shadow: 0 0 25px rgba(74, 222, 128, 0.1);
+        }
+
+        .game-complete-screen h2 {
+            font-size: 16px;
+            font-weight: 800;
+            color: var(--accent-success);
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-bottom: 15px;
+            text-shadow: 0 0 10px rgba(74, 222, 128, 0.3);
+        }
+
+        .game-complete-screen p {
+            font-size: 12px;
+            color: var(--white-soft);
+            margin-bottom: 30px;
+            max-width: 560px;
+            margin-left: auto;
+            margin-right: auto;
+            font-weight: 300;
+            line-height: 1.7;
+        }
+
+        .certificate-box {
+            border: 1px solid var(--white-line);
+            border-radius: var(--radius-btn);
+            padding: 30px;
+            background: var(--bg-overlay);
+            margin: 20px auto 30px auto;
+            max-width: 460px;
+        }
+
+        .certificate-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--white);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 12px;
+            text-shadow: 0 0 8px rgba(255, 255, 255, 0.2);
+        }
+
+        .certificate-meta {
+            font-size: 10px;
+            color: var(--white-muted);
+            font-style: italic;
+            letter-spacing: 0.5px;
+        }
+
+        /* === SELECCIÃ“N / SCROLLBAR === */
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--white-line);
+            border-radius: 2px;
+        }</style>
+</head>
+<body>
+
+    <div class="xxiii-app-container">
+        
+        <!-- Header -->
+        <header class="xxiii-header">
+            <h1 class="xxiii-title">Gestión del Talento en la Realidad Territorial</h1>
+            <p class="xxiii-subtitle">Procesos de Evaluación, Compensación y Mantenimiento de la Fuerza de Trabajo</p>
+        </header>
+
+        <!-- Barra de Progreso del Juego -->
+        <div class="game-progress-wrapper" id="progress-wrapper">
+            <div class="game-progress-info">Progreso: Nivel <span id="current-level-text">1</span> de 4</div>
+            <div class="game-progress-bar-container">
+                <div class="game-progress-bar-fill" id="progress-bar-fill"></div>
+            </div>
+        </div>
+
+        <!-- Navegación por Nodos -->
+        <nav class="xxiii-nav-flow" id="game-nav">
+            <div class="xxiii-nav-node active" id="nav-node-1" data-level="1" data-target="nodo-compensacion">
+                <span class="node-num">Nodo I</span>
+                <span class="node-name">Inyección Energética</span>
+            </div>
+            <div class="xxiii-nav-node disabled" id="nav-node-2" data-level="2" data-target="nodo-seguridad">
+                <span class="node-num">Nodo II</span>
+                <span class="node-name">Escudo de Preservación</span>
+            </div>
+            <div class="xxiii-nav-node disabled" id="nav-node-3" data-level="3" data-target="nodo-migracion">
+                <span class="node-num">Nodo III</span>
+                <span class="node-name">Evaporación y Fuga</span>
+            </div>
+            <div class="xxiii-nav-node disabled" id="nav-node-4" data-level="4" data-target="nodo-capital">
+                <span class="node-num">Nodo IV</span>
+                <span class="node-name">Destilación de Excedente</span>
+            </div>
+        </nav>
+
+        <!-- ==================== NODO I: COMPENSACIÓN ==================== -->
+        <div id="nodo-compensacion" class="xxiii-node-content active">
+            
+            <!-- Dilema 1 -->
+            <div class="dilemma-container" id="dilemma-1">
+                <h3 class="dilemma-title">Dilema I: Inyección Salarial en Escenario Inflacionario</h3>
+                <p class="dilemma-desc">Estás al mando de la nómina de tu equipo. El salario mínimo nacional en el territorio venezolano equivale a <strong>$3 mensuales</strong> (sueldo base oficial). Tu diseñador sénior te manifiesta que este monto ni siquiera cubre los gastos de transporte diario para asistir al estudio y evalúa renunciar. La directiva te exige solucionar la retención sin inflar permanentemente los pasivos laborales acumulados de la empresa en la contabilidad.</p>
+                
+                <div class="dilemma-options">
+                    <button class="dilemma-card-btn" data-choice="bad" data-level="1">
+                        <h5>A) Compensación Cosmética y Vía Informal</h5>
+                        <p>Mantener el salario base de nómina en $3. Compensarlo con un Salario Emocional espectacular (pizzas, masajes los viernes, horario flexible) y pagarle un bono de $150 recurrentes al mes en efectivo "por fuera" para no declarar ante entes oficiales.</p>
+                    </button>
+                    <button class="dilemma-card-btn" data-choice="good" data-level="1">
+                        <h5>B) Compensación en Suelo Real y Previsión Legal</h5>
+                        <p>Sincerar el Salario Base en nómina a $100 que garantice su permanencia física. Estructurar un Bono de Productividad variable de $50 no permanente condicionado a metas claras, y provisionar legalmente en balance los fondos trimestrales de prestaciones sociales.</p>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Fallo 1 -->
+            <div class="game-result-screen fail" id="fail-screen-1">
+                <h3 class="result-screen-title">✗ Desastre Legal y Quiebra de Pasivos (LOTTT Art. 104)</h3>
+                <p class="result-screen-desc">A los 6 meses, el diseñador decide retirarse voluntariamente. Sus abogados introducen una demanda judicial. Ante el tribunal, se aplica el <strong>Principio de Primacía de la Realidad e Irrenunciabilidad de los Derechos (LOTTT Art. 104)</strong>. El juez califica el bono recurrente de $150 como <em>salario normal</em>. Se te obliga a recalcular todas las prestaciones acumuladas de forma retroactiva basándose en un salario normal de $153. Los pasivos acumulados resultan impagables y congelan las cuentas del departamento.</p>
+                <button class="xxiii-btn xxiii-btn-secondary btn-retry" data-level="1">Reintentar Nivel 1</button>
+            </div>
+
+            <!-- Éxito 1 -->
+            <div class="game-result-screen success" id="success-screen-1">
+                <h3 class="result-screen-title">✓ Estructura Blindada y Garantía de Pasivos</h3>
+                <p class="result-screen-desc"><strong>Victoria Estratégica:</strong> Al sincerar el salario base y programar bonos condicionados variables, mantienes la tracción operativa del profesional. La empresa cuenta con una previsión transparente de las prestaciones (LOTTT Art. 142) y los pasivos son estables y controlados bajo auditoría.</p>
+                <button class="xxiii-btn btn-go-sandbox" data-level="1">Explorar Simulador (Sandbox)</button>
+            </div>
+
+            <!-- Sandbox 1 -->
+            <div class="sandbox-area" id="sandbox-1">
+                <span class="sandbox-unlocked-badge">Simulador Desbloqueado</span>
+                <div class="xxiii-critique-box">
+                    <h4>Enfoque Crítico</h4>
+                    <p>"El salario no es un elemento de 'motivación trascendental'; es el insumo material mínimo indispensable para la reproducción biológica y social de la fuerza de trabajo en el suelo real."</p>
+                </div>
+                
+                <div class="xxiii-two-col">
+                    <div class="xxiii-theory-column">
+                        <h3>Compensación y la LOTTT</h3>
+                        <p>La legislación venezolana protege con rigidez los ingresos de la fuerza de trabajo. Es vital conocer la estructura:</p>
+                        <ul>
+                            <li><strong>Art. 104 (Salario Normal):</strong> Comprende toda remuneración regular y permanente. Ojo con los bonos variables constantes, pueden judicializarse.</li>
+                            <li><strong>Art. 142 (Prestaciones Sociales):</strong> Régimen de garantía indexada que el patrono debe depositar trimestralmente como reserva obligatoria.</li>
+                            <li><strong>Salario Base:</strong> Rigidez indexada para sostener el poder adquisitivo real.</li>
+                            <li><strong>Salario Emocional:</strong> Lubricante social de bajo costo para amortiguar el desgaste psicológico sin mermar la caja.</li>
+                        </ul>
+                    </div>
+
+                    <div class="xxiii-interactive-widget">
+                        <div class="widget-title">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12" y2="18"></line></svg>
+                            Calculador de Estructura de Costos
+                        </div>
+
+                        <div class="xxiii-form-group">
+                            <label for="base-salary">Salario Base Mensual <span>$<span id="base-val">3</span></span></label>
+                            <input type="range" id="base-salary" class="xxiii-range" min="3" max="500" step="1" value="3">
+                        </div>
+
+                        <div class="xxiii-form-group">
+                            <label for="bonus-salary">Bonos Variables (Tácticos) <span>$<span id="bonus-val">100</span></span></label>
+                            <input type="range" id="bonus-salary" class="xxiii-range" min="0" max="400" step="1" value="100">
+                        </div>
+
+                        <div class="xxiii-form-group">
+                            <label for="emotional-salary">Paliativos (Salario Emocional) <span>$<span id="emotional-val">20</span></span></label>
+                            <input type="range" id="emotional-salary" class="xxiii-range" min="0" max="100" step="1" value="20">
+                        </div>
+
+                        <div class="calc-result-box">
+                            <div>
+                                <span class="calc-result-title">Inyección Mensual Total</span>
+                                <div class="calc-result-value">$<span id="total-val">123</span></div>
+                            </div>
+                            <div style="text-align: right;">
+                                <span class="calc-result-title">Pasivo Prestaciones (Mensual Proyectado)</span>
+                                <div class="calc-result-value" style="color: var(--accent-warn);">$<span id="pasivo-val">17.17</span></div>
+                            </div>
+                        </div>
+
+                        <div id="calc-alert" class="alert-card success">
+                            Estructura blindada. Los bonos variables representan un porcentaje adecuado del salario base.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="level-advance-wrapper">
+                    <button class="xxiii-btn xxiii-btn-success btn-advance-level" data-level="1">Avanzar al Nodo II</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== NODO II: SEGURIDAD Y HIGIENE ==================== -->
+        <div id="nodo-seguridad" class="xxiii-node-content">
+            
+            <!-- Dilema 2 -->
+            <div class="dilemma-container" id="dilemma-2">
+                <h3 class="dilemma-title">Dilema II: El Escudo de Preservación de la Salud</h3>
+                <p class="dilemma-desc">El taller de rotativas e impresión de la revista registra niveles continuos de ruido físico equivalentes a <strong>95 decibelios</strong> (superando el umbral de seguridad de 85 dB). Varios operadores acuden a ti quejándose de fatiga auditiva extrema, absentismo por dolores de cabeza constantes y posturas de esfuerzo incorrectas debido al diseño obsoleto de la maquinaria.</p>
+                
+                <div class="dilemma-options">
+                    <button class="dilemma-card-btn" data-choice="bad" data-level="2">
+                        <h5>A) Paliativos Colectivos y Reducción de Gasto</h5>
+                        <p>Distribuir tapones de algodón sencillos de farmacia en la entrada de la planta. Hablarle al equipo en una asamblea sobre el compromiso, la resiliencia patriótica y la lealtad laboral ante las limitaciones de presupuesto.</p>
+                    </button>
+                    <button class="dilemma-card-btn" data-choice="good" data-level="2">
+                        <h5>B) Escudo Técnico y Preservación de Salud (LOPCYMAT)</h5>
+                        <p>Constituir formalmente el Comité de Seguridad y Salud Laboral (CSSL), dotar de Protectores Auditivos de copa profesionales certificados e implementar mapas de riesgos con rotación de puestos y pausas obligatorias.</p>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Fallo 2 -->
+            <div class="game-result-screen fail" id="fail-screen-2">
+                <h3 class="result-screen-title">✗ Accidente Laboral, Sanción Penal y Clausura</h3>
+                <p class="result-screen-desc">La fatiga auditiva provoca que un operador no escuche la alarma sonora de retroceso de un montacargas. Sufre una lesión física grave. El ente supervisor (INPSASEL) inspecciona la planta y, al verificar que no posees Comité (CSSL) activo ni dotación ergonómica acorde a normas técnicas, ordena la clausura del local. La fiscalía imputa cargos penales directos contra la gerencia por negligencia y responsabilidad civil objetiva ante el accidente.</p>
+                <button class="xxiii-btn xxiii-btn-secondary btn-retry" data-level="2">Reintentar Nivel 2</button>
+            </div>
+
+            <!-- Éxito 2 -->
+            <div class="game-result-screen success" id="success-screen-2">
+                <h3 class="result-screen-title">✓ Escudo Activo y Cumplimiento Normativo</h3>
+                <p class="result-screen-desc"><strong>Victoria Estratégica:</strong> Mediante los protectores de copa y la constitución del CSSL, reduces a cero los accidentes mecánicos y la fatiga física. Proteges el recurso humano del desgaste biológico y blindas la responsabilidad penal de la empresa conforme a la ley de orden público.</p>
+                <button class="xxiii-btn btn-go-sandbox" data-level="2">Explorar Simulador (Sandbox)</button>
+            </div>
+
+            <!-- Sandbox 2 -->
+            <div class="sandbox-area" id="sandbox-2">
+                <span class="sandbox-unlocked-badge">Simulador Desbloqueado</span>
+                <div class="xxiii-critique-box">
+                    <h4>Enfoque Crítico</h4>
+                    <p>"La seguridad laboral no surge del altruismo corporativo, sino de la estricta necesidad de evitar la paralización física de la cadena productiva y de evadir la severa coerción punitiva del Estado."</p>
+                </div>
+
+                <div class="xxiii-two-col">
+                    <div class="xxiii-theory-column">
+                        <h3>El Escudo de Preservación</h3>
+                        <p>La seguridad e higiene buscan conservar el insumo biológico (el trabajador) en condiciones operativas:</p>
+                        <ul>
+                            <li><strong>Higiene Ocupacional:</strong> Control de factores físicos, químicos y ergonómicos para evitar el desgaste a largo plazo.</li>
+                            <li><strong>Seguridad Industrial:</strong> Métodos para impedir accidentes e interrupciones mecánicas imprevistas.</li>
+                            <li><strong>La Coerción LOPCYMAT:</strong> Ley de orden público que exige constituir los Comités de Seguridad (CSSL) e impone responsabilidad objetiva y penal directa al patrono ante negligencias.</li>
+                        </ul>
+                    </div>
+
+                    <div class="xxiii-interactive-widget">
+                        <div class="widget-title">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                            Escáner de Riesgos Ocupacionales
+                        </div>
+                        
+                        <p class="description" style="font-size: 11px; margin-bottom: 15px; color: var(--text-secondary);">Haz clic en los puntos rojos de la silueta para escanear los riesgos físicos y las obligaciones legales asociadas.</p>
+
+                        <div class="scanner-container">
+                            <div class="scanner-visual">
+                                <div class="scanner-silhouette-wrapper" style="position: relative; width: 100px; height: 240px; margin: 0 auto;">
+                                    <!-- SVG Silueta Humana Simplificada -->
+                                    <svg class="human-silhouette-svg" viewBox="0 0 100 240" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;">
+                                        <!-- Head -->
+                                        <circle cx="50" cy="30" r="14" />
+                                        <!-- Neck -->
+                                        <rect x="47" y="44" width="6" height="8" />
+                                        <!-- Torso -->
+                                        <path d="M 32,52 L 68,52 A 8,8 0 0 1 76,60 L 76,130 A 8,8 0 0 1 68,138 L 32,138 A 8,8 0 0 1 24,130 L 24,60 A 8,8 0 0 1 32,52 Z" />
+                                        <!-- Left Arm -->
+                                        <path d="M 24,60 L 14,115 A 4,4 0 0 0 22,117 L 26,80" />
+                                        <!-- Right Arm -->
+                                        <path d="M 76,60 L 86,115 A 4,4 0 0 1 78,117 L 74,80" />
+                                        <!-- Left Leg -->
+                                        <rect x="34" y="142" width="10" height="90" rx="4" />
+                                        <!-- Right Leg -->
+                                        <rect x="56" y="142" width="10" height="90" rx="4" />
+                                    </svg>
+                                    
+                                    <!-- Hotspots -->
+                                    <div class="scanner-hotspot active" id="hotspot-mental" data-target="mental">1</div>
+                                    <div class="scanner-hotspot" id="hotspot-ruido" data-target="ruido">2</div>
+                                    <div class="scanner-hotspot" id="hotspot-ergonomia" data-target="ergonomia">3</div>
+                                    <div class="scanner-hotspot" id="hotspot-mecanico" data-target="mecanico">4</div>
+                                </div>
+                            </div>
+
+                            <div class="scanner-details" id="scanner-details-box">
+                                <h4 id="detail-title">Cerebro: Autorregulación y Estrés</h4>
+                                
+                                <div class="detail-section">
+                                    <div class="detail-label">Sintomatología de desgaste</div>
+                                    <p id="detail-desc">El agotamiento severo del trabajador multifuncional (multitasking). Genera absentismo pasivo, errores operativos y deserción silenciosa.</p>
+                                </div>
+
+                                <div class="detail-section">
+                                    <div class="detail-label">Exigencia LOPCYMAT</div>
+                                    <p id="detail-law">Evaluación de factores psicosociales obligatoria en el programa de seguridad y salud en el trabajo (SSST).</p>
+                                </div>
+
+                                <div class="detail-section">
+                                    <div class="detail-label">Plan Preventivo de Terreno</div>
+                                    <p id="detail-plan">Establecimiento de límites operativos, pausas cognitivas y rediseño de tareas.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="level-advance-wrapper">
+                    <button class="xxiii-btn xxiii-btn-success btn-advance-level" data-level="2">Avanzar al Nodo III</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== NODO III: MIGRACIÓN Y RETENCIÓN ==================== -->
+        <div id="nodo-migracion" class="xxiii-node-content">
+            
+            <!-- Dilema 3 -->
+            <div class="dilemma-container" id="dilemma-3">
+                <h3 class="dilemma-title">Dilema III: Contención de la Fuga de Talento</h3>
+                <p class="dilemma-desc">La brecha cambiaria en el país se devalúa bruscamente y la inestabilidad inflacionaria destruye a la mitad el poder de compra de tus trabajadores. Dos de tus editores clave (el corazón editorial de la revista) te informan que están planeando emigrar a Colombia y Chile a fin de mes para buscar estabilidad material.</p>
+                
+                <div class="dilemma-options">
+                    <button class="dilemma-card-btn" data-choice="bad" data-level="3">
+                        <h5>A) Promesas de Incremento Nominal y Discurso Moral</h5>
+                        <p>Apelar a la lealtad de la "gran familia corporativa" y prometerles un incremento salarial del 30% en bolívares el mes siguiente, solicitando paciencia mientras el mercado nacional se estabiliza.</p>
+                    </button>
+                    <button class="dilemma-card-btn" data-choice="good" data-level="3">
+                        <h5>B) Indexación Territorial y Toparquía Autónoma</h5>
+                        <p>Indexar la compensación de forma flexible a divisas (sosteniendo el valor real frente al costo de la vida) y otorgarles <strong>Toparquía</strong> (autonomía local), eliminando trabas burocráticas sobre sus tiempos.</p>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Fallo 3 -->
+            <div class="game-result-screen fail" id="fail-screen-3">
+                <h3 class="result-screen-title">✗ Deserción y Evaporación de Operaciones</h3>
+                <p class="result-screen-desc">La promesa de bolívares se licúa en 15 días por la devaluación cambiaria. Los dos editores renuncian sin previo aviso y emigran. Sin su talento experto, no puedes cumplir los plazos de publicación mensual de la revista, lo que causa la cancelación de contratos publicitarios clave y pérdidas masivas de ingresos.</p>
+                <button class="xxiii-btn xxiii-btn-secondary btn-retry" data-level="3">Reintentar Nivel 3</button>
+            </div>
+
+            <!-- Éxito 3 -->
+            <div class="game-result-screen success" id="success-screen-3">
+                <h3 class="result-screen-title">✓ Retención Activa en el Suelo Real</h3>
+                <p class="result-screen-desc"><strong>Victoria Estratégica:</strong> Al indexar la compensación y dotar de toparquía a los departamentos, los editores obtienen estabilidad material para vivir en el territorio y la libertad de resolver retos a nivel local. Contienes la migración y mantienes la operación robusta.</p>
+                <button class="xxiii-btn btn-go-sandbox" data-level="3">Explorar Simulador (Sandbox)</button>
+            </div>
+
+            <!-- Sandbox 3 -->
+            <div class="sandbox-area" id="sandbox-3">
+                <span class="sandbox-unlocked-badge">Simulador Desbloqueado</span>
+                <div class="xxiii-critique-box">
+                    <h4>Enfoque Crítico</h4>
+                    <p>"El talento no se marcha por 'falta de lealtad'; migra cuando la brecha material entre el salario de subsistencia y el costo real de la vida vuelve inviable su permanencia en el territorio físico."</p>
+                </div>
+
+                <div class="xxiii-two-col">
+                    <div class="xxiii-theory-column">
+                        <h3>Evaporación de Talento</h3>
+                        <p>El desbalance cambiario y la inestabilidad anulan los lazos de "familia corporativa". Debemos aplicar controles tácticos:</p>
+                        <ul>
+                            <li><strong>Mapeo de Vacantes Críticas:</strong> Identificar qué puestos paralizarían la producción al quedar vacantes.</li>
+                            <li><strong>Indexación Flexible:</strong> Estructurar bonos variables anclados a divisas o indicadores reales para evitar la licuación del poder de compra.</li>
+                            <li><strong>Toparquía Departamental:</strong> Dotar de autonomía y poder de decisión real a los equipos locales, reduciendo la fricción burocrática y el desgaste psicológico.</li>
+                        </ul>
+                    </div>
+
+                    <div class="xxiii-interactive-widget">
+                        <div class="widget-title">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+                            Simulador de Evaporación de Fuerza de Trabajo
+                        </div>
+
+                        <div class="xxiii-form-group">
+                            <label for="env-inflation">Inestabilidad / Brecha Cambiaria <span><span id="inflation-val">60</span>%</span></label>
+                            <input type="range" id="env-inflation" class="xxiii-range" min="0" max="100" value="60">
+                        </div>
+
+                        <div class="xxiii-form-group">
+                            <label for="corp-toparqui">Grado de Autonomía (Toparquía) <span><span id="toparqui-val">20</span>%</span></label>
+                            <input type="range" id="corp-toparqui" class="xxiii-range" min="0" max="100" value="20">
+                        </div>
+
+                        <div class="xxiii-form-group">
+                            <label for="corp-index">Indexación y Compensación Flexible <span><span id="index-val">10</span>%</span></label>
+                            <input type="range" id="corp-index" class="xxiii-range" min="0" max="100" value="10">
+                        </div>
+
+                        <div class="vessel-outer">
+                            <div class="vessel-liquid" id="retention-bar"></div>
+                            <div class="vessel-bubbles" id="bubbles-container"></div>
+                        </div>
+
+                        <div class="calc-result-box" style="margin-top: 0;">
+                            <div>
+                                <span class="calc-result-title">Tasa de Evaporación de Talento</span>
+                                <div class="calc-result-value" id="evaporacion-val" style="color: var(--accent-warn);">63%</div>
+                            </div>
+                            <div style="text-align: right;">
+                                <span class="calc-result-title">Nivel de Retención Material</span>
+                                <div class="calc-result-value" id="retencion-val" style="color: var(--accent-success);">37%</div>
+                            </div>
+                        </div>
+
+                        <div id="retention-alert" class="alert-card warn" style="margin-top: 15px;">
+                            Fuga Inminente. La brecha cambiaria supera tus medidas de retención. El personal se evaporará por inviabilidad económica.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="level-advance-wrapper">
+                    <button class="xxiii-btn xxiii-btn-success btn-advance-level" data-level="3">Avanzar al Nodo IV</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== NODO IV: CAPITAL INTELECTUAL ==================== -->
+        <div id="nodo-capital" class="xxiii-node-content">
+            
+            <!-- Dilema 4 -->
+            <div class="dilemma-container" id="dilemma-4">
+                <h3 class="dilemma-title">Dilema IV: La Destilación del Excedente Individual</h3>
+                <p class="dilemma-desc">Tu programador jefe (quien diseñó empíricamente toda la base de datos de la web interactiva de la revista) te avisa que ha conseguido un contrato en remoto con una firma europea y se va de la empresa en exactamente 15 días. Es el único que domina el código y la arquitectura del portal web.</p>
+                
+                <div class="dilemma-options">
+                    <button class="dilemma-card-btn" data-choice="bad" data-level="4">
+                        <h5>A) Transición Informal basada en Buena Voluntad</h5>
+                        <p>Organizarle una fiesta de despedida, desearle éxito y acordar de palabra que "nos preste auxilio" por WhatsApp si la página web llega a caerse, confiando en sus años de amistad.</p>
+                    </button>
+                    <button class="dilemma-card-btn" data-choice="good" data-level="4">
+                        <h5>B) Codificación Inmediata a Capital Estructural</h5>
+                        <p>Pagarle un bono especial de cierre para que dedique sus últimos 15 días única y exclusivamente a documentar procesos, generar diagramas, codificar manuales y entrenar a un sucesor.</p>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Fallo 4 -->
+            <div class="game-result-screen fail" id="fail-screen-4">
+                <h3 class="result-screen-title">✗ Pérdida Crítica de Capital Intelectual</h3>
+                <p class="result-screen-desc">El programador se va a su nuevo empleo. Al tercer día, la base de datos de la revista sufre una caída de servidor. Lo llamas por auxilio, pero está ocupado en reuniones en su nuevo puesto. Nadie en tu equipo entiende el código indocumentado. Pierdes el control de la web interactiva y la reputación comercial digital.</p>
+                <button class="xxiii-btn xxiii-btn-secondary btn-retry" data-level="4">Reintentar Nivel 4</button>
+            </div>
+
+            <!-- Éxito 4 -->
+            <div class="game-result-screen success" id="success-screen-4">
+                <h3 class="result-screen-title">✓ Victoria del Capital Estructural</h3>
+                <p class="result-screen-desc"><strong>Victoria Estratégica:</strong> El programador se retira de la organización, pero el conocimiento del sujeto fue "destilado" y consolidado en manuales de procesos estructurados, independientes de la persona física. La web interactiva opera sin contratiempos.</p>
+                <button class="xxiii-btn btn-go-sandbox" data-level="4">Explorar Simulador (Sandbox)</button>
+            </div>
+
+            <!-- Sandbox 4 -->
+            <div class="sandbox-area" id="sandbox-4">
+                <span class="sandbox-unlocked-badge">Simulador Desbloqueado</span>
+                <div class="xxiii-critique-box">
+                    <h4>Enfoque Crítico</h4>
+                    <p>"El fin último de la gestión estratégica no es mimar al empleado, sino garantizar que su conocimiento individual sea drenado y codificado en sistemas permanentes por la empresa antes de que ejerza su opción de salida."</p>
+                </div>
+
+                <div class="xxiii-two-col">
+                    <div class="xxiii-theory-column">
+                        <h3>Destilación del Conocimiento</h3>
+                        <p>El talento individual es efímero; se retiene transformándolo en sistemas indestructibles:</p>
+                        <ul>
+                            <li><strong>Capital Humano (El Insumo):</strong> El potencial, la destreza y salud que el trabajador posee y arrienda temporalmente.</li>
+                            <li><strong>Capital Estructural (El Columbario):</strong> La victoria de la empresa: manuales, metodologías, bases de datos y software que se quedan cuando el empleado se marcha.</li>
+                            <li><strong>Capital Relacional (La Red):</strong> Las relaciones de valor y reputación de la organización con el entorno territorial.</li>
+                        </ul>
+                    </div>
+
+                    <div class="xxiii-interactive-widget">
+                        <div class="widget-title">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"></path><path d="M2 17l10 5 10-5"></path><path d="M2 12l10 5 10-5"></path></svg>
+                            El Destilador de Conocimiento
+                        </div>
+
+                        <div class="destilador-grid">
+                            <div class="destilador-column">
+                                <div class="destilador-col-title">
+                                    Capital Humano (Volátil)
+                                    <span id="humano-status" style="color: var(--accent-warn); font-weight: 800;">Activo</span>
+                                </div>
+                                <div class="human-container">
+                                    <div class="human-avatar" id="human-avatar">👤</div>
+                                </div>
+                            </div>
+
+                            <div class="destilador-column">
+                                <div class="destilador-col-title">
+                                    Capital Estructural (Permanente)
+                                    <span id="estructural-status" style="color: var(--text-secondary);">Vacío</span>
+                                </div>
+                                
+                                <div class="structural-grid">
+                                    <div class="structural-slot" id="slot-procesos">Procesos</div>
+                                    <div class="structural-slot" id="slot-software">Software</div>
+                                    <div class="structural-slot" id="slot-manuales">Manuales</div>
+                                    <div class="structural-slot" id="slot-codigos">Metodologías</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="destilador-actions">
+                            <button type="button" class="xxiii-btn" id="btn-codificar">
+                                Codificar Conocimiento
+                            </button>
+                            <button type="button" class="xxiii-btn xxiii-btn-secondary" id="btn-salida">
+                                Simular Renuncia/Salida
+                            </button>
+                        </div>
+
+                        <div class="destilador-result" id="destilador-result-box" style="display: none;">
+                            <div id="destilador-alert" class="alert-card">
+                                Diagnóstico de simulación...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="level-advance-wrapper">
+                    <button class="xxiii-btn xxiii-btn-success btn-finish-game">Finalizar Simulación Gerencial</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== PANTALLA JUEGO COMPLETADO ==================== -->
+        <div class="game-complete-screen" id="game-complete-screen">
+            <h2>Simulación Completada con Éxito</h2>
+            <p>Has superado de forma quirúrgica los dilemas normativos del territorio, blindando a la organización ante pasivos laborales desmedidos (LOTTT), previniendo los accidentes físicos (LOPCYMAT), conteniendo la evaporación del talento y consolidando el conocimiento volátil en capital estructural permanente.</p>
+            
+            <div class="certificate-box">
+                <div class="certificate-title">Gerente Estratégico en Suelo Real</div>
+                <p style="font-size: 13px; color: var(--text-primary); margin-bottom: 10px;">Otorgado por la Unidad de Innovación de XXIII Magazine</p>
+                <div class="certificate-meta">Código de Verificación: XXIII-TALENTO-M4</div>
+            </div>
+
+            <button type="button" class="xxiii-btn" id="btn-reset-game">Reiniciar Juego Completo</button>
+        </div>
+
+    </div>
+
+    <!-- JS Logic -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // === ESTADO GLOBAL DEL JUEGO ===
+            let currentLevel = 1;
+            const unlockedLevels = [1];
+            
+            // Navegación
+            const navNodes = document.querySelectorAll(".xxiii-nav-node");
+            const nodeContents = document.querySelectorAll(".xxiii-node-content");
+            const progressWrapper = document.getElementById("progress-wrapper");
+            const currentLevelText = document.getElementById("current-level-text");
+            const progressBarFill = document.getElementById("progress-bar-fill");
+            const gameNav = document.getElementById("game-nav");
+
+            // --- Lógica de pestañas de navegación ---
+            function updateNavUI() {
+                navNodes.forEach(node => {
+                    const lvl = parseInt(node.getAttribute("data-level"));
+                    node.className = "xxiii-nav-node";
+                    
+                    if (lvl === currentLevel) {
+                        node.classList.add("active");
+                    }
+                    if (!unlockedLevels.includes(lvl)) {
+                        node.classList.add("disabled");
+                    }
+                    if (unlockedLevels.includes(lvl) && lvl < currentLevel) {
+                        node.classList.add("completed");
+                    }
+                });
+
+                currentLevelText.textContent = currentLevel;
+                progressBarFill.style.width = `${((currentLevel - 1) / 4) * 100 + 25}%`;
+            }
+
+            navNodes.forEach(node => {
+                node.addEventListener("click", function() {
+                    const lvl = parseInt(this.getAttribute("data-level"));
+                    if (unlockedLevels.includes(lvl)) {
+                        currentLevel = lvl;
+                        
+                        navNodes.forEach(n => n.classList.remove("active"));
+                        nodeContents.forEach(c => c.classList.remove("active"));
+
+                        this.classList.add("active");
+                        const targetId = this.getAttribute("data-target");
+                        document.getElementById(targetId).classList.add("active");
+                        
+                        updateNavUI();
+                    }
+                });
+            });
+
+            // --- DILEMAS DE CADA NIVEL ---
+            const optionBtns = document.querySelectorAll(".dilemma-card-btn");
+            const retryBtns = document.querySelectorAll(".btn-retry");
+            const sandboxBtns = document.querySelectorAll(".btn-go-sandbox");
+            const advanceBtns = document.querySelectorAll(".btn-advance-level");
+            const finishBtn = document.querySelector(".btn-finish-game");
+            const resetGameBtn = document.getElementById("btn-reset-game");
+            const gameCompleteScreen = document.getElementById("game-complete-screen");
+
+            optionBtns.forEach(btn => {
+                btn.addEventListener("click", function() {
+                    const lvl = this.getAttribute("data-level");
+                    const choice = this.getAttribute("data-choice");
+                    
+                    // Ocultar Dilema
+                    document.getElementById(`dilemma-${lvl}`).style.display = "none";
+
+                    if (choice === "good") {
+                        // Ã‰xito
+                        document.getElementById(`success-screen-${lvl}`).style.display = "block";
+                        document.body.classList.add("game-state-success");
+                        document.body.classList.remove("game-state-fail");
+                    } else {
+                        // Fallo
+                        document.getElementById(`fail-screen-${lvl}`).style.display = "block";
+                        document.body.classList.add("game-state-fail");
+                        document.body.classList.remove("game-state-success");
+                    }
+                });
+            });
+
+            retryBtns.forEach(btn => {
+                btn.addEventListener("click", function() {
+                    const lvl = this.getAttribute("data-level");
+                    // Ocultar pantalla de fallo
+                    document.getElementById(`fail-screen-${lvl}`).style.display = "none";
+                    // Mostrar dilema de nuevo
+                    document.getElementById(`dilemma-${lvl}`).style.display = "block";
+                    // Reestablecer color del body
+                    document.body.classList.remove("game-state-fail");
+                });
+            });
+
+            sandboxBtns.forEach(btn => {
+                btn.addEventListener("click", function() {
+                    const lvl = this.getAttribute("data-level");
+                    // Ocultar pantalla de Ã©xito
+                    document.getElementById(`success-screen-${lvl}`).style.display = "none";
+                    // Mostrar sandbox
+                    document.getElementById(`sandbox-${lvl}`).style.display = "block";
+                    // Reestablecer color del body
+                    document.body.classList.remove("game-state-success");
+                });
+            });
+
+            advanceBtns.forEach(btn => {
+                btn.addEventListener("click", function() {
+                    const lvl = parseInt(this.getAttribute("data-level"));
+                    const nextLvl = lvl + 1;
+                    
+                    if (nextLvl <= 4) {
+                        unlockedLevels.push(nextLvl);
+                        currentLevel = nextLvl;
+                        
+                        // Ocultar contenidos de nodos
+                        nodeContents.forEach(c => c.classList.remove("active"));
+                        
+                        // Activar siguiente nodo
+                        const nextNode = document.querySelector(`.xxiii-nav-node[data-level="${nextLvl}"]`);
+                        const targetId = nextNode.getAttribute("data-target");
+                        document.getElementById(targetId).classList.add("active");
+                        
+                        // Reestablecer color del body
+                        document.body.classList.remove("game-state-success");
+                        
+                        updateNavUI();
+                    }
+                });
+            });
+
+            finishBtn.addEventListener("click", function() {
+                // Ocultar todos los nodos
+                nodeContents.forEach(c => c.classList.remove("active"));
+                // Ocultar nav y progreso
+                gameNav.style.display = "none";
+                progressWrapper.style.display = "none";
+                // Mostrar pantalla final
+                gameCompleteScreen.style.display = "block";
+                // Poner la pantalla en verde success
+                document.body.classList.add("game-state-success");
+                document.body.classList.remove("game-state-fail");
+            });
+
+            resetGameBtn.addEventListener("click", function() {
+                // Resetear estado del juego
+                currentLevel = 1;
+                unlockedLevels.length = 0;
+                unlockedLevels.push(1);
+                
+                // Limpiar clases del body
+                document.body.classList.remove("game-state-fail", "game-state-success");
+                
+                // Resetear visibilidad de dilemas, Ã©xitos, fallos y sandboxes
+                for (let i = 1; i <= 4; i++) {
+                    document.getElementById(`dilemma-${i}`).style.display = "block";
+                    document.getElementById(`fail-screen-${i}`).style.display = "none";
+                    document.getElementById(`success-screen-${i}`).style.display = "none";
+                    document.getElementById(`sandbox-${i}`).style.display = "none";
+                }
+                
+                // Mostrar primer nodo
+                nodeContents.forEach(c => c.classList.remove("active"));
+                document.getElementById("nodo-compensacion").classList.add("active");
+                
+                // Mostrar nav y progreso
+                gameNav.style.display = "grid";
+                progressWrapper.style.display = "flex";
+                gameCompleteScreen.style.display = "none";
+                
+                // Reiniciar simuladores individuales
+                resetSimulation1();
+                resetSimulation4();
+                
+                updateNavUI();
+            });
+
+
+            // === F. SIMULADOR NODO I (CALCULADORA LOTTT) ===
+            const baseSalaryInput = document.getElementById("base-salary");
+            const bonusSalaryInput = document.getElementById("bonus-salary");
+            const emotionalSalaryInput = document.getElementById("emotional-salary");
+
+            const baseVal = document.getElementById("base-val");
+            const bonusVal = document.getElementById("bonus-val");
+            const emotionalVal = document.getElementById("emotional-val");
+            const totalVal = document.getElementById("total-val");
+            const pasivoVal = document.getElementById("pasivo-val");
+            const calcAlert = document.getElementById("calc-alert");
+
+            function updateCalculator() {
+                const base = parseFloat(baseSalaryInput.value);
+                const bonus = parseFloat(bonusSalaryInput.value);
+                const emotional = parseFloat(emotionalSalaryInput.value);
+
+                baseVal.textContent = base;
+                bonusVal.textContent = bonus;
+                emotionalVal.textContent = emotional;
+
+                const total = base + bonus + emotional;
+                totalVal.textContent = total.toFixed(2);
+
+                // Prestaciones: 5 días del salario base e incentivos regulares mensuales
+                const pasivo = (base + bonus) * (5 / 30);
+                pasivoVal.textContent = pasivo.toFixed(2);
+
+                const ratioBonusBase = (bonus / base) * 100;
+
+                if (base < 10) {
+                    calcAlert.className = "alert-card warn";
+                    calcAlert.innerHTML = `<strong>ALERTA DE SUBSISTENCIA:</strong> El salario base de $${base} es inviable físicamente para el sustento diario. Tu tasa de evaporación en el Nodo III se verá impactada negativamente por esta brecha material.`;
+                } else if (ratioBonusBase > 40) {
+                    calcAlert.className = "alert-card warn";
+                    calcAlert.innerHTML = `<strong>ALERTA DE RIESGO DE RECALIFICACIÓN (Art. 104 LOTTT):</strong> Los bonos variables representan el ${ratioBonusBase.toFixed(0)}% del salario base. Existe un riesgo crítico de que la inspectoría del trabajo los declare "salario normal" debido a su recurrencia.`;
+                } else {
+                    calcAlert.className = "alert-card success";
+                    calcAlert.innerHTML = `<strong>ESTRUCTURA BLINDADA:</strong> Los bonos tácticos representan el ${ratioBonusBase.toFixed(0)}% del salario base, manteniéndose dentro de un límite saludable para incentivar la tracción operativa sin inflar permanentemente los costos fijos.`;
+                }
+            }
+
+            function resetSimulation1() {
+                baseSalaryInput.value = 3;
+                bonusSalaryInput.value = 100;
+                emotionalSalaryInput.value = 20;
+                updateCalculator();
+            }
+
+            baseSalaryInput.addEventListener("input", updateCalculator);
+            bonusSalaryInput.addEventListener("input", updateCalculator);
+            emotionalSalaryInput.addEventListener("input", updateCalculator);
+            updateCalculator();
+
+
+            // === G. SIMULADOR NODO II (ESCÁNER LOPCYMAT) ===
+            const hotspots = document.querySelectorAll(".scanner-hotspot");
+            const detailTitle = document.getElementById("detail-title");
+            const detailDesc = document.getElementById("detail-desc");
+            const detailLaw = document.getElementById("detail-law");
+            const detailPlan = document.getElementById("detail-plan");
+
+            const hotspotData = {
+                mental: {
+                    title: "Cerebro: Agotamiento y Estrés",
+                    desc: "Desgaste psicofisiológico severo que ocurre cuando las exigencias superan los recursos materiales del sujeto (común en trabajadores multitarea). Dispara el absentismo y desinterés pasivo.",
+                    law: "LOPCYMAT obliga al patrono a evaluar y controlar los riesgos psicosociales de forma continua en su programa de salud (SSST).",
+                    plan: "Definición quirúrgica de tareas, limitación del multitasking, descansos mentales y toparquía (autonomía local)."
+                },
+                ruido: {
+                    title: "Oídos: Fatiga Auditiva y Ruido",
+                    desc: "La exposición a ruidos industriales descontrolados causa fatiga laboral y daños de audición permanente, reduciendo la concentración y la productividad.",
+                    law: "Estándares COVENIN y LOPCYMAT exigen monitoreo de decibeles e imponen sanciones pecuniarias severas si se violan los límites.",
+                    plan: "Aislamiento de fuentes sonoras, suministro de Protectores Auditivos de copa y pausas acústicas."
+                },
+                ergonomia: {
+                    title: "Columna: Desgaste Ergonómico",
+                    desc: "Lesiones osteomusculares y fatiga física severa producida por posturas incorrectas prolongadas o levantamiento inadecuado de cargas en el terreno de trabajo.",
+                    law: "Normas técnicas de ergonomía de la LOPCYMAT exigen el rediseño de puestos de trabajo y responsabilizan objetivamente al patrono ante patologías de columna.",
+                    plan: "Mapeo ergonómico, pausas activas físicas guiadas y rediseño de mobiliario/puestos."
+                },
+                mecanico: {
+                    title: "Extremidades: Accidentes de Trabajo",
+                    desc: "Lesiones mecánicas imprevistas con ocasión del trabajo. Representan la interrupción de la fuerza laboral y la paralización del proceso productivo.",
+                    law: "LOPCYMAT consagra la responsabilidad civil objetiva y sanciones penales inmediatas ante negligencias ergonómicas o accidentes que causen lesiones graves o muerte.",
+                    plan: "Mapas de riesgos físicos visibles, dotación obligatoria de EPP y constitución efectiva del Comité de Seguridad (CSSL)."
+                }
+            };
+
+            hotspots.forEach(hotspot => {
+                hotspot.addEventListener("click", function() {
+                    hotspots.forEach(h => h.classList.remove("active"));
+                    this.classList.add("active");
+
+                    const key = this.getAttribute("data-target");
+                    const data = hotspotData[key];
+
+                    detailTitle.textContent = data.title;
+                    detailDesc.textContent = data.desc;
+                    detailLaw.textContent = data.law;
+                    detailPlan.textContent = data.plan;
+                });
+            });
+
+
+            // === H. SIMULADOR NODO III (SIMULADOR MIGRACIÓN) ===
+            const envInflationInput = document.getElementById("env-inflation");
+            const corpToparquiInput = document.getElementById("corp-toparqui");
+            const corpIndexInput = document.getElementById("corp-index");
+
+            const inflationVal = document.getElementById("inflation-val");
+            const toparquiVal = document.getElementById("toparqui-val");
+            const indexVal = document.getElementById("index-val");
+            
+            const retentionBar = document.getElementById("retention-bar");
+            const evaporacionVal = document.getElementById("evaporacion-val");
+            const retencionVal = document.getElementById("retencion-val");
+            const retentionAlert = document.getElementById("retention-alert");
+            const bubblesContainer = document.getElementById("bubbles-container");
+
+            function updateRetention() {
+                const inflation = parseFloat(envInflationInput.value);
+                const toparqui = parseFloat(corpToparquiInput.value);
+                const index = parseFloat(corpIndexInput.value);
+
+                inflationVal.textContent = inflation;
+                toparquiVal.textContent = toparqui;
+                indexVal.textContent = index;
+
+                // Tasa de evaporación matemática
+                let evaporacion = (inflation * 0.7) - (index * 0.4) - (toparqui * 0.3) + 30;
+                evaporacion = Math.max(5, Math.min(95, evaporacion));
+                const retencion = 100 - evaporacion;
+
+                evaporacionVal.textContent = `${evaporacion.toFixed(0)}%`;
+                retencionVal.textContent = `${retencion.toFixed(0)}%`;
+                retentionBar.style.width = `${retencion}%`;
+
+                // Cambiar color de la barra segÃºn nivel
+                if (retencion < 30) {
+                    retentionBar.style.setProperty('--bar-color', 'var(--accent-danger)');
+                    retentionAlert.className = "alert-card danger";
+                    retentionAlert.innerHTML = `<strong>FUGA INMINENTE:</strong> La brecha cambiaria material es insostenible. El personal se evaporarÃ¡ rÃ¡pidamente; la retÃ³rica de "gran familia corporativa" no compite con la subsistencia.`;
+                } else if (retencion < 60) {
+                    retentionBar.style.setProperty('--bar-color', 'var(--accent-warn)');
+                    retentionAlert.className = "alert-card warn";
+                    retentionAlert.innerHTML = `<strong>FRICCIÃ“N OPERATIVA:</strong> Se observa absentismo crÃ³nico y fuga silenciosa. Es fundamental dotar de mayor <strong>ToparquÃ­a</strong> (autonomÃ­a departamental) a los equipos para aliviar la asfixia del entorno.`;
+                } else {
+                    retentionBar.style.setProperty('--bar-color', 'var(--accent-success)');
+                    retentionAlert.className = "alert-card success";
+                    retentionAlert.innerHTML = `<strong>ESTABILIDAD TERRITORIAL:</strong> La retenciÃ³n es saludable. La indexaciÃ³n salarial y la autonomÃ­a tÃ©cnica reducen la asfixia del entorno exterior y sostienen la operaciÃ³n real.`;
+                }
+
+                // Burbujas dinÃ¡micas segÃºn evaporaciÃ³n
+                bubblesContainer.innerHTML = "";
+                const bubbleCount = Math.floor(evaporacion / 8);
+                for (let i = 0; i < bubbleCount; i++) {
+                    const bubble = document.createElement("div");
+                    bubble.className = "bubble";
+                    bubble.style.left = `${Math.random() * 100}%`;
+                    bubble.style.animationDelay = `${Math.random() * 2}s`;
+                    bubble.style.setProperty('--b-x', `${(Math.random() - 0.5) * 40}px`);
+                    bubblesContainer.appendChild(bubble);
+                }
+            }
+
+            envInflationInput.addEventListener("input", updateRetention);
+            corpToparquiInput.addEventListener("input", updateRetention);
+            corpIndexInput.addEventListener("input", updateRetention);
+            updateRetention();
+
+
+            // === I. SIMULADOR NODO IV (EL DESTILADOR DE CAPITAL) ===
+            const btnCodificar = document.getElementById("btn-codificar");
+            const btnSalida = document.getElementById("btn-salida");
+            
+            const humanAvatar = document.getElementById("human-avatar");
+            const humanoStatus = document.getElementById("humano-status");
+            const estructuralStatus = document.getElementById("estructural-status");
+            
+            const slots = {
+                procesos: document.getElementById("slot-procesos"),
+                software: document.getElementById("slot-software"),
+                manuales: document.getElementById("slot-manuales"),
+                codigos: document.getElementById("slot-codigos")
+            };
+
+            const destiladorResultBox = document.getElementById("destilador-result-box");
+            const destiladorAlert = document.getElementById("destilador-alert");
+
+            let conocimientoCodificado = false;
+            let empleadoSalido = false;
+
+            btnCodificar.addEventListener("click", function() {
+                if (empleadoSalido) return;
+
+                conocimientoCodificado = true;
+                estructuralStatus.textContent = "100% Codificado";
+                estructuralStatus.style.color = "var(--accent-success)";
+
+                for (let key in slots) {
+                    slots[key].classList.add("filled");
+                    slots[key].textContent = `✓ ${slots[key].id.replace("slot-", "").toUpperCase()}`;
+                }
+            });
+
+            btnSalida.addEventListener("click", function() {
+                if (empleadoSalido) return;
+
+                empleadoSalido = true;
+                humanAvatar.classList.add("faded");
+                humanoStatus.textContent = "Ausente";
+                humanoStatus.style.color = "var(--text-secondary)";
+
+                destiladorResultBox.style.display = "block";
+
+                if (conocimientoCodificado) {
+                    destiladorAlert.className = "alert-card success";
+                    destiladorAlert.innerHTML = `<strong>VICTORIA ESTRATÉGICA (Estabilidad Estructural):</strong> El trabajador ha renunciado, pero las metodologías, manuales y procesos permanecen codificados. La producción continúa en el suelo real sin interrupción física.`;
+                } else {
+                    destiladorAlert.className = "alert-card warn";
+                    destiladorAlert.innerHTML = `<strong>COLAPSO OPERACIONAL (Pérdida de Capital):</strong> El trabajador ha renunciado y se marchó con todo el conocimiento. La operación se detiene. Incapacidad de la empresa para codificar el insumo individual en capital estructural permanente.`;
+                }
+            });
+
+            function resetSimulation4() {
+                conocimientoCodificado = false;
+                empleadoSalido = false;
+
+                humanAvatar.classList.remove("faded");
+                humanoStatus.textContent = "Activo";
+                humanoStatus.style.color = "var(--accent-warn)";
+                estructuralStatus.textContent = "Vacío";
+                estructuralStatus.style.color = "var(--text-secondary)";
+
+                for (let key in slots) {
+                    slots[key].classList.remove("filled");
+                    slots[key].textContent = key.charAt(0).toUpperCase() + key.slice(1);
+                }
+
+                destiladorResultBox.style.display = "none";
+            }
+        });
+    </script>
+</body>
+</html>
